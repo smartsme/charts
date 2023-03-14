@@ -1,0 +1,53 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-image: url('../img/repeated-square-dark.webp');
+    background-repeat: repeat;
+    overflow-x: hidden;
+}
+
+div.input {
+    width: 100%;
+}
+
+.col div.input span, .col div.input input[type=checkbox] {
+    float: left;
+}
+
+.col input[type=checkbox] {
+    margin: 6px 5px;
+}
+
+.col div.input select {
+    float: right;
+}
+
+#form > div.input {
+    margin: 5px;
+    padding: 5px;
+}
+
+#form {
+    margin: auto;
+    background-color: #fff !important;
+    padding: 20px;
+}
+
+#form h1 {
+    text-align: center;
+    margin: 20px 0;
+}
+
+#chartContainer {
+    margin: auto;
+    padding-bottom: 100px;
+    position: relative;
+}
+
+#chart {
+    width: 100%;
+}
