@@ -45,37 +45,23 @@ return static function (RouteBuilder $routes) {
     $routes->setRouteClass(DashedRoute::class);
 
     $routes->scope('/', function (RouteBuilder $builder) {
-        /*
-         * Here, we are connecting '/' (base path) to a controller called 'Pages',
-         * its action called 'display', and we pass a param to select the view file
-         * to use (in this case, templates/Pages/home.php)...
-         */
-        $builder->connect('/', ['controller' => 'Pages', 'action' => 'chart']);
+        $builder->connect('/', ['controller' => 'Pages', 'action' => 'home']);
         $builder->connect('/wykresy', ['controller' => 'Pages', 'action' => 'chart']);
         $builder->connect('/get-codes', ['controller' => 'Charts', 'action' => 'getCodes']);
-        $builder->connect('/logowanie', ['controller' => 'Pages', 'action' => 'login']);
         $builder->connect('/login', ['controller' => 'Users', 'action' => 'login']);
         $builder->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
-
-        /*
-         * ...and connect the rest of 'Pages' controller's URLs.
-         */
         $builder->connect('/pages/*', 'Pages::display');
 
-        /*
-         * Connect catchall routes for all controllers.
-         *
-         * The `fallbacks` method is a shortcut for
-         *
-         * ```
-         * $builder->connect('/{controller}', ['action' => 'index']);
-         * $builder->connect('/{controller}/{action}/*', []);
-         * ```
-         *
-         * You can remove these routes once you've connected the
-         * routes you want in your application.
-         */
         $builder->fallbacks();
+    });
+
+    $routes->prefix('Admin', function (RouteBuilder $routes) {
+        // All routes here will be prefixed with `/admin`, and
+        // have the `'prefix' => 'Admin'` route element added that
+        // will be required when generating URLs for these routes
+        $routes->connect('/panel', ['controller' => 'Users', 'action' => 'panel']);
+        $routes->connect('/create', ['controller' => 'Users', 'action' => 'create']);
+        $routes->fallbacks(DashedRoute::class);
     });
 
     /*

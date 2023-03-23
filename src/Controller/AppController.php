@@ -18,6 +18,8 @@ namespace App\Controller;
 
 use Cake\Controller\Controller;
 
+use function PHPSTORM_META\map;
+
 /**
  * Application Controller
  *

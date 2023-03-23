@@ -14,14 +14,16 @@ declare(strict_types=1);
  * @since     0.2.9
  * @license   https://opensource.org/licenses/mit-license.php MIT License
  */
-namespace App\Controller;
+namespace App\Controller\Admin;
 
-use App\Model\Entity\User;
+use App\Controller\AppController as AppController;
 use Cake\Auth\DefaultPasswordHasher;
 use Cake\Core\Configure;
 use Cake\Http\Exception\ForbiddenException;
 use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
+use Cake\Utility\Security;
+use Cake\Utility\Text;
 use Cake\View\Exception\MissingTemplateException;
 
 /**
@@ -35,15 +37,10 @@ class UsersController extends AppController
 {
     public function initialize(): void
     {
-        parent::initialize();
         $this->loadComponent('Auth', [
-            'authenticate' => [
-                'Form' => [
-                    'fields' => ['username' => 'login', 'password' => 'password'],
-                ],
-            ],
+            'authorize' => 'Controller',
         ]);
-        $this->Auth->allow('login');
+        $this->loadComponent('Flash');
     }
 
     public function isAuthorized($user = null)
@@ -102,32 +99,64 @@ class UsersController extends AppController
         }
     }
 
-    public function login()
+    public function panel()
+    {
+        $users = $this->getTableLocator()->get('Users')->find();
+        $this->set('users', $users->all());
+    }
+
+    public function create()
     {
         if ($this->request->is('post')) {
-            $user = $this->Auth->identify();
-            if ($user) {
-                $this->Auth->setUser($user);
-                if ($this->Auth->authenticationProvider()->needsPasswordRehash()) {
-                    $user = $this->Users->get($this->Auth->user('id'));
-                    $user->password = $this->request->getData('password');
-                    $this->Users->save($user);
-                }
+            $userTable = $this->getTableLocator()->get('Users');
+            $user = $userTable->newEmptyEntity();
 
-                return $this->redirect($this->Auth->redirectUrl());
-            } else {
-                $this->Flash->error('<p class="text-danger text-center">Login lub hasło jest niepoprawne.</p>', [
-                    'key' => 'authError',
+            $hasher = new DefaultPasswordHasher();
+            $first_name = $this->request->getData('first_name');
+            $last_name = $this->request->getData('last_name');
+            $login = $this->request->getData('login');
+            $email = $this->request->getData('email');
+            $password = $this->request->getData('password');
+            $password_confirm = $this->request->getData('password_confirm');
+            $token = Security::hash(Security::randomBytes(32));
+
+            if ($password != $password_confirm) {
+                $this->Flash->error('<p class="text-danger text-center">Hasła się nie zgadzają.</p>', [
+                    'key' => 'create',
                     'clear' => true,
                     'escape' => false,
                 ]);
+
+                return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'create']);
+            }
+
+            $user = $userTable->newEntity($this->request->getData());
+            $user->id = Text::uuid();
+            $user->token = $token;
+            $user->first_name = $first_name;
+            $user->last_name = $last_name;
+            $user->login = $login;
+            $user->email = $email;
+            $user->password = $hasher->hash($password);
+
+            if ($userTable->save($user)) {
+                $this->Flash->success('<p class="text-success text-center">Użytkownik został stworzony.</p>', [
+                    'key' => 'create',
+                    'clear' => true,
+                    'escape' => false,
+                ]);
+
+                return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'create']);
+            } else {
+                $this->Flash->error('<p class="text-danger text-center">Nie udało się stworzyć użytkownika! Spróbuj ponownie później.</p>', [
+                    'key' => 'create',
+                    'clear' => true,
+                    'escape' => false,
+                ]);
+
+                return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'create']);
             }
         }
-    }
-
-    public function logout()
-    {
-        return $this->redirect($this->Auth->logout());
+        // $this->set(compact('user'));
     }
 }
-

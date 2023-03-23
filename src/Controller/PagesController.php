@@ -97,6 +97,10 @@ class PagesController extends AppController
         }
     }
 
+    public function home()
+    {
+    }
+
     /**
      * Chart page
      *
@@ -349,11 +353,5 @@ class PagesController extends AppController
 
         $this->set('labels', $labels ?? []);
         $this->set('data', $data ?? []);
-    }
-
-    public function login()
-    {
-        $user = new User();
-        $this->set('user', $user);
     }
 }
