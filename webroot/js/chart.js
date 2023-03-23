@@ -16,6 +16,7 @@ $(() => {
 
     $('#start').val(params.get('start'));
     $('#end').val(params.get('end'));
+    $('#sum').prop('checked', JSON.parse(params.get('sum')));
     for (let i = 0; i < params.getAll('table').length; i++) {
         $(`input[data-table=${params.getAll('table')[i]}]`).prop('checked', true);
     }
@@ -42,7 +43,7 @@ $(() => {
         params.delete('table');
         params.delete('code');
         params.delete('mode');
-        $('input:checked:not(#draw)').each(function() {
+        $('input:checked:not(#draw):not(#sum)').each(function() {
             params.append('table', $(this).data('table'));
             if ($(this).siblings('.code').length) {
                 params.append('code', $(this).siblings('.code').eq(0).val());
@@ -53,6 +54,7 @@ $(() => {
         })
         params.set('start', $('#start').val());
         params.set('end', $('#end').val());
+        params.set('sum', $('#sum').is(':checked'));
         location.replace(`${window.location.origin}${window.location.pathname}?${params.toString()}`)
     });
 

@@ -16,6 +16,7 @@ declare(strict_types=1);
  */
 namespace App\Controller;
 
+use App\Model\Entity\User;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Cake\Http\Exception\ForbiddenException;
@@ -32,6 +33,30 @@ use Cake\View\Exception\MissingTemplateException;
  */
 class PagesController extends AppController
 {
+    public function initialize(): void
+    {
+        $this->loadComponent('Auth', [
+            'authorize' => 'Controller',
+        ]);
+        $this->Auth->allow('login');
+    }
+
+    public function isAuthorized($user = null)
+    {
+        // Any registered user can access public functions
+        if (!$this->request->getParam('prefix')) {
+            return true;
+        }
+
+        // Only admins can access admin functions
+        if ($this->request->getParam('prefix') === 'Admin') {
+            return (bool)($user['is_admin']);
+        }
+
+        // Default deny
+        return false;
+    }
+
     /**
      * Displays a view
      *
@@ -80,8 +105,6 @@ class PagesController extends AppController
     public function chart()
     {
         $connection = ConnectionManager::get('default');
-        $startDate = $this->request->getQuery('start') ?? '2023-01-01';
-        $endDate = $this->request->getQuery('end') ?? date('Y-m-d');
         $tablesColumns = [
             'generation_from_wind_sources' => [
                 'solar',
@@ -173,6 +196,17 @@ class PagesController extends AppController
                 'Generacja',
                 'Pompowanie',
             ],
+            'carbon_emissions' => [
+                'value',
+            ],
+            'coal_api2' => [
+                'price',
+                'open',
+                'high',
+                'low',
+                'volume',
+                'price_change',
+            ],
         ];
 
         $hourlyTables = [
@@ -180,9 +214,13 @@ class PagesController extends AppController
             'inter_system_exchange_of_power_flows',
             'kse_demands',
             'prices_and_quantity_of_energy_in_the_balancing_market',
+            'carbon_emissions',
+            'coal_api2',
         ];
 
-        if ($_GET['table']) {
+        if ($this->request->getQuery('table')) {
+            $startDate = empty($this->request->getQuery('start')) ? '2023-01-01' : $this->request->getQuery('start');
+            $endDate = empty($this->request->getQuery('end')) ? date('Y-m-d') : $this->request->getQuery('end');
             $query = explode('&', $_SERVER['QUERY_STRING']);
             $params = [];
 
@@ -209,14 +247,14 @@ class PagesController extends AppController
                 return $dates;
             }
 
-            function generateSql($table, $columns, $hourly, $code, $startDate, $endDate, $mode = '')
+            function generateSql($table, $columns, $hourly, $code, $startDate, $endDate, $groupedHours = true, $sum = false, $mode = '')
             {
                 $fields = '';
                 if ($table != 'generation_of_power_generation_units') {
                     $columnsCount = count($columns[$table]);
                     for ($i = 0; $i < $columnsCount; $i++) {
                         $column = $columns[$table][$i];
-                        $fields .= 'ROUND(' . ($hourly ? "AVG(`$column`)" : "`$column`") . ", 2) as $column, ";
+                        $fields .= 'ROUND(' . ($hourly && $groupedHours ? (filter_var($sum, FILTER_VALIDATE_BOOLEAN) ? 'SUM' : 'AVG') . "(`$column`)" : "`$column`") . ", 2) as $column, ";
                     }
                 } else {
                     $fields = 'ROUND((`h1` + `h2` + `h3` + `h4` + `h5` + `h6` + `h7` + `h8` + `h9` + `h10` + `h11` + `h12` + `h13` + `h14` + `h15` + `h16` + `h17` + `h18` + `h19` + `h20` + `h21` + `h22` + `h23` + `h24`) / 24, 2) as power';
@@ -225,7 +263,7 @@ class PagesController extends AppController
                 $code = $table == 'rdn_gas_contract' ? "LIKE '$code%'" : "= '$code'";
                 $fields = rtrim($fields, ', ');
                 $mode = $table == 'generation_of_power_generation_units' ? " AND `mode` = '$mode'" : '';
-                $sql = "SELECT `date`, $fields FROM $table WHERE `date` BETWEEN '$startDate' AND '$endDate'" . (!$hourly ? "AND `code` $code $mode" : 'GROUP BY `date`');
+                $sql = 'SELECT ' . ($groupedHours ? '`date`' : 'CONCAT(`date`, \' - \', `hour`) as date') . ", $fields FROM $table WHERE `date` BETWEEN '$startDate' AND '$endDate'" . (!$hourly ? "AND `code` $code $mode" : ($groupedHours ? ' GROUP BY `date`' : ' ORDER BY `hour` ASC'));
 
                 return $sql;
             }
@@ -271,30 +309,51 @@ class PagesController extends AppController
             }
 
             $data = [];
-            $labels = dateRange($startDate, $endDate);
-            foreach ($tableCodePairs as $table => $code) {
-                if ($table != 'generation_of_power_generation_units') {
-                    $sql = generateSql($table, $tablesColumns, in_array($table, $hourlyTables), $code, $startDate, $endDate);
+            $labels = [];
+
+            if (!array_diff(array_keys($tableCodePairs), $hourlyTables) && $startDate == $endDate) {
+                for ($i = 1; $i <= 24; $i++) {
+                    array_push($labels, "$startDate - $i");
+                }
+                foreach ($tableCodePairs as $table => $code) {
+                    $sql = generateSql($table, $tablesColumns, in_array($table, $hourlyTables), $code, $startDate, $endDate, false, $this->request->getQuery('sum'));
                     $records = $connection->execute($sql)->fetchAll('assoc');
                     if ($records) {
                         $data = populateData($records, $data, $table);
                     }
-                } else {
-                    $sql = generateSql($table, $tablesColumns, in_array($table, $hourlyTables), $code, $startDate, $endDate, 'Generacja');
-                    $records = $connection->execute($sql)->fetchAll('assoc');
-                    if ($records) {
-                        $data = populateData($records, $data, $table, 'Generacja');
-                    }
-                    $sql = generateSql($table, $tablesColumns, in_array($table, $hourlyTables), $code, $startDate, $endDate, 'Pompowanie');
-                    $records = $connection->execute($sql)->fetchAll('assoc');
-                    if ($records) {
-                        $data = array_merge($data, populateData($records, $data, $table, 'Pompowanie'));
+                }
+            } else {
+                foreach ($tableCodePairs as $table => $code) {
+                    $labels = dateRange($startDate, $endDate);
+                    if ($table != 'generation_of_power_generation_units') {
+                        $sql = generateSql($table, $tablesColumns, in_array($table, $hourlyTables), $code, $startDate, $endDate, true, $this->request->getQuery('sum'));
+                        $records = $connection->execute($sql)->fetchAll('assoc');
+                        if ($records) {
+                            $data = populateData($records, $data, $table);
+                        }
+                    } else {
+                        $sql = generateSql($table, $tablesColumns, in_array($table, $hourlyTables), $code, $startDate, $endDate, true, $this->request->getQuery('sum'), 'Generacja');
+                        $records = $connection->execute($sql)->fetchAll('assoc');
+                        if ($records) {
+                            $data = populateData($records, $data, $table, 'Generacja');
+                        }
+                        $sql = generateSql($table, $tablesColumns, in_array($table, $hourlyTables), $code, $startDate, $endDate, true, $this->request->getQuery('sum'), 'Pompowanie');
+                        $records = $connection->execute($sql)->fetchAll('assoc');
+                        if ($records) {
+                            $data = array_merge($data, populateData($records, $data, $table, 'Pompowanie'));
+                        }
                     }
                 }
             }
         }
 
-        $this->set('labels', $labels);
-        $this->set('data', $data);
+        $this->set('labels', $labels ?? []);
+        $this->set('data', $data ?? []);
+    }
+
+    public function login()
+    {
+        $user = new User();
+        $this->set('user', $user);
     }
 }

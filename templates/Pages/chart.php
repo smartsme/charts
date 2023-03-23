@@ -11,6 +11,10 @@
             Tryb lepszej wydajności(nie rysuje punktów na wykresie(Domyślnie wyłączone)) 
             <input type="checkbox" id="draw" class="form-check-input">
         </div>
+        <div class="input m-5 m-md-4 m-lg-4 m-xl-1 m-xxl-1">
+            Używaj sumy zamiast średniej dla danych godzinowych 
+            <input type="checkbox" id="sum" class="form-check-input" name="sum">
+        </div>
         <div class="row">
             <div class="col col-12 col-xxl-6 float-start px-4 py-xxl-4">
                 <div class="input px-1 float-start w-100 shadow p-3 m-2 rounded-3">
@@ -84,8 +88,16 @@
                     <span>Gaz RDN indeksy</span>
                     <select class='code form-select'></select>
                 </div>
+                <div class="input float-start w-100 shadow p-3 m-2 rounded-3">
+                    <input type="checkbox" class="form-check-input" data-table="carbon_emissions">
+                    <span>Kontrakty terminowe na emisję CO2</span>
+                </div>
+                <div class="input float-start w-100 shadow p-3 m-2 rounded-3">
+                    <input type="checkbox" class="form-check-input" data-table="coal_api2">
+                    <span>Coal (API2) CIF ARA (ARGUS-McCloskey) Futures</span>
+                </div>
                 <div class="input">
-                    <button id="submitBtn" class="btn btn-dark m-2"> Wyświetl</button>
+                    <button id="submitBtn" class="btn btn-dark m-2">Wyświetl</button>
                 </div>
             </div>
         </div>
