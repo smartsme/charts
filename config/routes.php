@@ -50,6 +50,8 @@ return static function (RouteBuilder $routes) {
         $builder->connect('/get-codes', ['controller' => 'Charts', 'action' => 'getCodes']);
         $builder->connect('/login', ['controller' => 'Users', 'action' => 'login']);
         $builder->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
+        $builder->connect('/forgot-password', ['controller' => 'Users', 'action' => 'forgotPassword']);
+        $builder->connect('/reset-password/*', ['controller' => 'Users', 'action' => 'resetPassword']);
         $builder->connect('/pages/*', 'Pages::display');
 
         $builder->fallbacks();
@@ -61,6 +63,8 @@ return static function (RouteBuilder $routes) {
         // will be required when generating URLs for these routes
         $routes->connect('/panel', ['controller' => 'Users', 'action' => 'panel']);
         $routes->connect('/create', ['controller' => 'Users', 'action' => 'create']);
+        $routes->connect('/update', ['controller' => 'Users', 'action' => 'update']);
+        $routes->connect('/delete', ['controller' => 'Users', 'action' => 'delete']);
         $routes->fallbacks(DashedRoute::class);
     });
 

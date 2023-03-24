@@ -16,12 +16,13 @@ declare(strict_types=1);
  */
 namespace App\Controller;
 
-use App\Model\Entity\User;
 use Cake\Auth\DefaultPasswordHasher;
 use Cake\Core\Configure;
 use Cake\Http\Exception\ForbiddenException;
 use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;
+use Cake\Mailer\Mailer;
+use Cake\Utility\Security;
 use Cake\View\Exception\MissingTemplateException;
 
 /**
@@ -43,7 +44,7 @@ class UsersController extends AppController
                 ],
             ],
         ]);
-        $this->Auth->allow('login');
+        $this->Auth->allow(['login', 'forgotPassword', 'resetPassword']);
     }
 
     public function isAuthorized($user = null)
@@ -104,6 +105,7 @@ class UsersController extends AppController
 
     public function login()
     {
+        $session = $this->request->getSession();
         if ($this->request->is('post')) {
             $user = $this->Auth->identify();
             if ($user) {
@@ -113,6 +115,7 @@ class UsersController extends AppController
                     $user->password = $this->request->getData('password');
                     $this->Users->save($user);
                 }
+                $session->write('user_id', $this->Auth->user('id'));
 
                 return $this->redirect($this->Auth->redirectUrl());
             } else {
@@ -129,5 +132,87 @@ class UsersController extends AppController
     {
         return $this->redirect($this->Auth->logout());
     }
-}
 
+    public function forgotPassword()
+    {
+        if ($this->request->is('post')) {
+            $email = $this->request->getData('email');
+            $token = Security::hash(Security::randomBytes(25));
+
+            $userTable = $this->getTableLocator()->get('Users');
+            if ($email == null) {
+                $this->Flash->error('<p class="text-danger text-center">Proszę wpisać swój adres email.</p>', [
+                    'key' => 'forgotPassword',
+                    'clear' => true,
+                    'escape' => false,
+                ]);
+
+                return $this->redirect(['prefix' => null, 'controller' => 'Users', 'action' => 'forgotPassword']);
+            }
+
+            $user = $userTable->find('all')->where(['email' => $email])->first();
+
+            if ($user) {
+                $user->token = $token;
+                if ($userTable->save($user)) {
+                    $mailer = new Mailer('default');
+                    $mailer->setTransport('smtp');
+                    $mailer->setFrom(['no-reply@smartsme.pl' => 'Smartsme'])
+                    ->setTo($email)
+                    ->setEmailFormat('html')
+                    ->setSubject('Pomoc w odzyskiwaniu hasła smartsme')
+                    ->deliver("Hello<br/>Kliknj tutaj żeby zresetować swoje hasło<br/><br/><a href='https://www.smartsme.pl/reset-password/$token'>Resetuj hasło</a>");
+                }
+                $this->Flash->success('<p class="text-success text-center">Wiadomość została wysłana na podany adres email!</p>', [
+                    'key' => 'forgotPassword',
+                    'clear' => true,
+                    'escape' => false,
+                ]);
+
+                return $this->redirect(['prefix' => null, 'controller' => 'Users', 'action' => 'forgotPassword']);
+            } else {
+                $this->Flash->error('<p class="text-danger text-center">Nie znaleźliśmy użytkownika o podanym adresie email!</p>', [
+                    'key' => 'forgotPassword',
+                    'clear' => true,
+                    'escape' => false,
+                ]);
+
+                return $this->redirect(['prefix' => null, 'controller' => 'Users', 'action' => 'forgotPassword']);
+            }
+        }
+    }
+
+    public function resetPassword($token)
+    {
+        if ($this->request->is('post')) {
+            $hasher = new DefaultPasswordHasher();
+            $password = $this->request->getData('password');
+            $password_confirm = $this->request->getData('password_confirm');
+
+            if ($password == $password_confirm) {
+                $userTable = $this->getTableLocator()->get('Users');
+                $user = $userTable->find('all')->where(['token' => $token])->first();
+                if ($user) {
+                    $user->password = $hasher->hash($password);
+                    if ($userTable->save($user)) {
+                        $this->Flash->success('<p class="text-success text-center">Hasło zostało zmienione pomyślnie!</p>', [
+                            'key' => 'passwordReset',
+                            'clear' => true,
+                            'escape' => false,
+                        ]);
+
+                        return $this->redirect(['prefix' => null, 'controller' => 'Users', 'action' => 'login']);
+                    }
+                }
+            } else {
+                $this->Flash->error('<p class="text-danger text-center">Hasła muszą być takie same!</p>', [
+                    'key' => 'resetPassword',
+                    'clear' => true,
+                    'escape' => false,
+                ]);
+
+                return $this->redirect(['prefix' => null, 'controller' => 'Users', 'action' => 'resetPassword']);
+            }
+        }
+    }
+}

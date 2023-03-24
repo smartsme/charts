@@ -12,7 +12,12 @@
     echo '<h1 class="pb-3">Smartsme</h1>';
     echo $this->Form->control('login', ['class' => 'form-control w-100 mb-3 mx-auto', 'label' => 'Login']);
     echo $this->Form->control('password', ['class' => 'form-control w-100 mb-3 mx-auto', 'label' => 'Hasło']);
-
+    echo $this->Html->link(
+        'Zapomniałem hasła',
+        ['prefix' => null, 'controller' => 'Users', 'action' => 'forgotPassword'],
+        ['class' => 'text-center mb-4'],
+    );
     echo $this->Form->button('Zaloguj się', ['class' => 'btn btn-primary']);
     echo $this->Flash->render('authError');
+    echo $this->Flash->render('passwordReset');
     echo $this->Form->end();

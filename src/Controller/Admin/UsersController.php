@@ -157,6 +157,94 @@ class UsersController extends AppController
                 return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'create']);
             }
         }
-        // $this->set(compact('user'));
+    }
+
+    public function update()
+    {
+        if ($this->request->is('post')) {
+            $userTable = $this->getTableLocator()->get('Users');
+            $user = $userTable->get($this->request->getData('user_id'));
+
+            $hasher = new DefaultPasswordHasher();
+            $first_name = $this->request->getData('first_name');
+            $last_name = $this->request->getData('last_name');
+            $login = $this->request->getData('login');
+            $email = $this->request->getData('email');
+            $password = $this->request->getData('password');
+            $password_confirm = $this->request->getData('password_confirm');
+
+            if ($password != $password_confirm) {
+                $this->Flash->error('<p class="text-danger text-center">Hasła się nie zgadzają.</p>', [
+                    'key' => 'update',
+                    'clear' => true,
+                    'escape' => false,
+                ]);
+
+                return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'update']);
+            }
+
+            $user->first_name = $first_name;
+            $user->last_name = $last_name;
+            $user->login = $login;
+            $user->email = $email;
+            $user->password = $hasher->hash($password);
+
+            if ($userTable->save($user)) {
+                $this->Flash->success('<p class="text-success text-center">Dane użytkownika zostały zmienione.</p>', [
+                    'key' => 'update',
+                    'clear' => true,
+                    'escape' => false,
+                ]);
+
+                return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'update']);
+            } else {
+                $this->Flash->error('<p class="text-danger text-center">Nie udało się zedytować danych użytkownika! Spróbuj ponownie później.</p>', [
+                    'key' => 'update',
+                    'clear' => true,
+                    'escape' => false,
+                ]);
+
+                return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'update']);
+            }
+        }
+
+        $users = $this->getTableLocator()->get('Users')->find('all')->select(['id', 'login'])->all()->toList();
+        $selectList = [];
+        foreach ($users as $user) {
+            $selectList[$user->id] = $user->login;
+        }
+        $this->set('users', $selectList);
+    }
+
+    public function delete()
+    {
+        if ($this->request->is('post')) {
+            $userTable = $this->getTableLocator()->get('Users');
+            $user = $userTable->get($this->request->getData('user_id'));
+            if ($userTable->delete($user)) {
+                $this->Flash->success('<p class="text-success text-center">Użytkownik został usunięty.</p>', [
+                    'key' => 'delete',
+                    'clear' => true,
+                    'escape' => false,
+                ]);
+
+                return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'delete']);
+            } else {
+                $this->Flash->error('<p class="text-danger text-center">Nie udało się usunąć użytkownika! Spróbuj ponownie później.</p>', [
+                    'key' => 'delete',
+                    'clear' => true,
+                    'escape' => false,
+                ]);
+
+                return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'delete']);
+            }
+        }
+
+        $users = $this->getTableLocator()->get('Users')->find('all')->select(['id', 'login'])->toList();
+        $selectList = [];
+        foreach ($users as $user) {
+            $selectList[$user->id] = $user->login;
+        }
+        $this->set('users', $selectList);
     }
 }

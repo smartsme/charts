@@ -3,4 +3,13 @@
         'Stwórz użytkownika',
         ['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'create'],
     );
-    debug($users);
+    echo '<br />';
+    echo $this->Html->link(
+        'Edytuj użytkownika',
+        ['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'update'],
+    );
+    echo '<br />';
+    echo $this->Html->link(
+        'Usuń użytkownika',
+        ['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'delete'],
+    );

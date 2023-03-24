@@ -16,7 +16,6 @@ declare(strict_types=1);
  */
 namespace App\Controller;
 
-use App\Model\Entity\User;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Cake\Http\Exception\ForbiddenException;
@@ -99,6 +98,8 @@ class PagesController extends AppController
 
     public function home()
     {
+        $session = $this->request->getSession();
+        $this->set('is_admin', (bool)$this->getTableLocator()->get('Users')->find('all')->where(['id' => $session->read('user_id')])->select('is_admin')->first()->is_admin);
     }
 
     /**
