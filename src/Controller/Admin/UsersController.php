@@ -131,30 +131,42 @@ class UsersController extends AppController
             }
 
             $user = $userTable->newEntity($this->request->getData());
-            $user->id = Text::uuid();
-            $user->token = $token;
-            $user->first_name = $first_name;
-            $user->last_name = $last_name;
-            $user->login = $login;
-            $user->email = $email;
-            $user->password = $hasher->hash($password);
-
-            if ($userTable->save($user)) {
-                $this->Flash->success('<p class="text-success text-center">Użytkownik został stworzony.</p>', [
-                    'key' => 'create',
-                    'clear' => true,
-                    'escape' => false,
-                ]);
+            if ($user->getErrors()) {
+                foreach ($user->getErrors() as $name => $error) {
+                    $this->Flash->error('<p class="text-danger text-center">' . $error['_empty'] . '</p>', [
+                        'key' => $name,
+                        'clear' => true,
+                        'escape' => false,
+                    ]);
+                }
 
                 return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'create']);
             } else {
-                $this->Flash->error('<p class="text-danger text-center">Nie udało się stworzyć użytkownika! Spróbuj ponownie później.</p>', [
-                    'key' => 'create',
-                    'clear' => true,
-                    'escape' => false,
-                ]);
+                $user->id = Text::uuid();
+                $user->token = $token;
+                $user->first_name = $first_name;
+                $user->last_name = $last_name;
+                $user->login = $login;
+                $user->email = $email;
+                $user->password = $hasher->hash($password);
 
-                return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'create']);
+                if ($userTable->save($user)) {
+                    $this->Flash->success('<p class="text-success text-center">Użytkownik został stworzony.</p>', [
+                        'key' => 'create',
+                        'clear' => true,
+                        'escape' => false,
+                    ]);
+
+                    return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'create']);
+                } else {
+                    $this->Flash->error('<p class="text-danger text-center">Nie udało się stworzyć użytkownika! Spróbuj ponownie później.</p>', [
+                        'key' => 'create',
+                        'clear' => true,
+                        'escape' => false,
+                    ]);
+
+                    return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'create']);
+                }
             }
         }
     }
@@ -240,11 +252,17 @@ class UsersController extends AppController
             }
         }
 
-        $users = $this->getTableLocator()->get('Users')->find('all')->select(['id', 'login'])->toList();
+        $users = $this->getTableLocator()->get('Users')->find('all')->select(['id', 'login'])->all()->toList();
         $selectList = [];
         foreach ($users as $user) {
             $selectList[$user->id] = $user->login;
         }
         $this->set('users', $selectList);
+    }
+
+    public function list()
+    {
+        $users = $this->getTableLocator()->get('Users')->find('all')->select(['login', 'first_name', 'last_name', 'email'])->all()->toList();
+        $this->set('users', $users);
     }
 }

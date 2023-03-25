@@ -12,6 +12,7 @@
         echo $this->Html->script('https://cdn.jsdelivr.net/npm/chart.js');
         echo $this->Html->script('https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js');
         echo $this->Html->css('https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css');
+        echo $this->Html->css('main');
         echo $this->fetch('meta');
         echo $this->fetch('css');
         echo $this->fetch('script');
@@ -19,6 +20,13 @@
 </head>
 <body>
     <main class="main">
+        <?php
+        preg_match('/([^\/]+$)/', $_SERVER['REQUEST_URI'], $match);
+
+        if (isset($match[0]) && $match[0] != 'login') {
+            echo '<a href="javascript:history.go(-1)" class="go-back btn btn-primary">WRÓĆ</a>';
+        }
+        ?>
         <div class="container">
             <?= $this->fetch('content') ?>
         </div>

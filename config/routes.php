@@ -65,6 +65,7 @@ return static function (RouteBuilder $routes) {
         $routes->connect('/create', ['controller' => 'Users', 'action' => 'create']);
         $routes->connect('/update', ['controller' => 'Users', 'action' => 'update']);
         $routes->connect('/delete', ['controller' => 'Users', 'action' => 'delete']);
+        $routes->connect('/list', ['controller' => 'Users', 'action' => 'list']);
         $routes->fallbacks(DashedRoute::class);
     });
 
