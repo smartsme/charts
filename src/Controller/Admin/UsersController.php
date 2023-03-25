@@ -175,48 +175,60 @@ class UsersController extends AppController
     {
         if ($this->request->is('post')) {
             $userTable = $this->getTableLocator()->get('Users');
-            $user = $userTable->get($this->request->getData('user_id'));
-
-            $hasher = new DefaultPasswordHasher();
-            $first_name = $this->request->getData('first_name');
-            $last_name = $this->request->getData('last_name');
-            $login = $this->request->getData('login');
-            $email = $this->request->getData('email');
-            $password = $this->request->getData('password');
-            $password_confirm = $this->request->getData('password_confirm');
-
-            if ($password != $password_confirm) {
-                $this->Flash->error('<p class="text-danger text-center">Hasła się nie zgadzają.</p>', [
-                    'key' => 'update',
-                    'clear' => true,
-                    'escape' => false,
-                ]);
-
-                return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'update']);
-            }
-
-            $user->first_name = $first_name;
-            $user->last_name = $last_name;
-            $user->login = $login;
-            $user->email = $email;
-            $user->password = $hasher->hash($password);
-
-            if ($userTable->save($user)) {
-                $this->Flash->success('<p class="text-success text-center">Dane użytkownika zostały zmienione.</p>', [
-                    'key' => 'update',
-                    'clear' => true,
-                    'escape' => false,
-                ]);
+            $user = $userTable->newEntity($this->request->getData());
+            if ($user->getErrors()) {
+                foreach ($user->getErrors() as $name => $error) {
+                    $this->Flash->error('<p class="text-danger text-center">' . $error['_empty'] . '</p>', [
+                        'key' => $name,
+                        'clear' => true,
+                        'escape' => false,
+                    ]);
+                }
 
                 return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'update']);
             } else {
-                $this->Flash->error('<p class="text-danger text-center">Nie udało się zedytować danych użytkownika! Spróbuj ponownie później.</p>', [
-                    'key' => 'update',
-                    'clear' => true,
-                    'escape' => false,
-                ]);
+                $user = $userTable->get($this->request->getData('user_id'));
+                $hasher = new DefaultPasswordHasher();
+                $first_name = $this->request->getData('first_name');
+                $last_name = $this->request->getData('last_name');
+                $login = $this->request->getData('login');
+                $email = $this->request->getData('email');
+                $password = $this->request->getData('password');
+                $password_confirm = $this->request->getData('password_confirm');
 
-                return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'update']);
+                if ($password != $password_confirm) {
+                    $this->Flash->error('<p class="text-danger text-center">Hasła się nie zgadzają.</p>', [
+                        'key' => 'update',
+                        'clear' => true,
+                        'escape' => false,
+                    ]);
+
+                    return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'update']);
+                }
+
+                $user->first_name = $first_name;
+                $user->last_name = $last_name;
+                $user->login = $login;
+                $user->email = $email;
+                $user->password = $hasher->hash($password);
+
+                if ($userTable->save($user)) {
+                    $this->Flash->success('<p class="text-success text-center">Dane użytkownika zostały zmienione.</p>', [
+                        'key' => 'update',
+                        'clear' => true,
+                        'escape' => false,
+                    ]);
+
+                    return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'update']);
+                } else {
+                    $this->Flash->error('<p class="text-danger text-center">Nie udało się zedytować danych użytkownika! Spróbuj ponownie później.</p>', [
+                        'key' => 'update',
+                        'clear' => true,
+                        'escape' => false,
+                    ]);
+
+                    return $this->redirect(['prefix' => 'Admin', 'controller' => 'Users', 'action' => 'update']);
+                }
             }
         }
 
