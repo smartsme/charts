@@ -103,6 +103,7 @@ class UsersController extends AppController
     {
         $users = $this->getTableLocator()->get('Users')->find();
         $this->set('users', $users->all());
+        $this->set('title', 'Panel administratora');
     }
 
     public function create()
@@ -169,6 +170,7 @@ class UsersController extends AppController
                 }
             }
         }
+        $this->set('title', 'Stwórz użytkownika');
     }
 
     public function update()
@@ -238,6 +240,7 @@ class UsersController extends AppController
             $selectList[$user->id] = $user->login;
         }
         $this->set('users', $selectList);
+        $this->set('title', 'Zaaktualizuj dane użytkownika');
     }
 
     public function delete()
@@ -270,11 +273,13 @@ class UsersController extends AppController
             $selectList[$user->id] = $user->login;
         }
         $this->set('users', $selectList);
+        $this->set('title', 'Usuń użytkownika');
     }
 
     public function list()
     {
         $users = $this->getTableLocator()->get('Users')->find('all')->select(['login', 'first_name', 'last_name', 'email'])->all()->toList();
         $this->set('users', $users);
+        $this->set('title', 'Lista użytkowników');
     }
 }

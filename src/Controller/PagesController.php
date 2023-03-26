@@ -100,6 +100,7 @@ class PagesController extends AppController
     {
         $session = $this->request->getSession();
         $this->set('is_admin', (bool)$this->getTableLocator()->get('Users')->find('all')->where(['id' => $session->read('user_id')])->select('is_admin')->first()->is_admin);
+        $this->set('title', 'Strona główna');
     }
 
     /**
@@ -316,7 +317,7 @@ class PagesController extends AppController
             $data = [];
             $labels = [];
 
-            if (!array_diff(array_keys($tableCodePairs), $hourlyTables) && $startDate == $endDate) {
+            if (!array_diff(array_keys($tableCodePairs), $hourlyTables) && $startDate == $endDate && !count(array_intersect(['carbon_emissions', 'coal_api2'], array_keys($tableCodePairs)))) {
                 for ($i = 1; $i <= 24; $i++) {
                     array_push($labels, "$startDate - $i");
                 }
@@ -354,5 +355,6 @@ class PagesController extends AppController
 
         $this->set('labels', $labels ?? []);
         $this->set('data', $data ?? []);
+        $this->set('title', 'Wykresy');
     }
 }

@@ -126,6 +126,7 @@ class UsersController extends AppController
                 ]);
             }
         }
+        $this->set('title', 'Logowanie');
     }
 
     public function logout()
@@ -180,6 +181,7 @@ class UsersController extends AppController
                 return $this->redirect(['prefix' => null, 'controller' => 'Users', 'action' => 'forgotPassword']);
             }
         }
+        $this->set('title', 'Zapomniałem hasła');
     }
 
     public function resetPassword($token)
@@ -214,5 +216,6 @@ class UsersController extends AppController
                 return $this->redirect(['prefix' => null, 'controller' => 'Users', 'action' => 'resetPassword']);
             }
         }
+        $this->set('title', 'Zresetuj hasło');
     }
 }

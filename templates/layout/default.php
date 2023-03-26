@@ -4,7 +4,7 @@
 <head>
     <?= $this->Html->charset() ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= $this->fetch('title') ?></title>
+    <title><?= h($title) ?></title>
     <?php
         echo $this->Html->meta('icon');
         echo $this->Html->script('https://polyfill.io/v3/polyfill.min.js?features=ResizeObserver');
