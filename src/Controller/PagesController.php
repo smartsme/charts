@@ -328,6 +328,39 @@ class PagesController extends AppController
                         $data = populateData($records, $data, $table);
                     }
                 }
+            } elseif (count(array_intersect($hourlyTables, array_keys($tableCodePairs))) < count($tableCodePairs) && $startDate == $endDate) {
+                $dates = [];
+                for ($i = 0; $i < 24; $i++) {
+                    array_push($dates, $startDate . ' - ' . ($i + 1));
+                }
+                foreach ($tableCodePairs as $table => $code) {
+                    if (in_array($table, $hourlyTables)) {
+                        $sql = generateSql($table, $tablesColumns, true, $code, $startDate, $endDate, false, $this->request->getQuery('sum'));
+                        $records = $connection->execute($sql)->fetchAll('assoc');
+                        if ($records) {
+                            $populated = populateData($records, $data, $table);
+                            foreach ($populated as $table => $arr) {
+                                $data[$table] = $arr;
+                            }
+                        }
+                    } else {
+                        $sql = generateSql($table, $tablesColumns, false, $code, $startDate, $endDate, true, $this->request->getQuery('sum'));
+                        $records = $connection->execute($sql)->fetchAll('assoc');
+                        $final = [];
+                        for ($i = 0; $i < 24; $i++) {
+                            for ($j = 0; $j < count($records); $j++) {
+                                $records[$j]['date'] = $dates[$i];
+                                array_push($final, $records[$j]);
+                            }
+                        }
+                        if ($records) {
+                            $populated = populateData($final, $data, $table);
+                            foreach ($populated as $table => $arr) {
+                                $data[$table] = $arr;
+                            }
+                        }
+                    }
+                }
             } else {
                 foreach ($tableCodePairs as $table => $code) {
                     $labels = dateRange($startDate, $endDate);

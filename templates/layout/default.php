@@ -24,7 +24,7 @@
         preg_match('/([^\/]+$)/', $_SERVER['REQUEST_URI'], $match);
 
         if (isset($match[0]) && $match[0] != 'login') {
-            echo '<a href="javascript:history.go(-1)" class="go-back btn btn-primary">WRÓĆ</a>';
+            // echo '<a href="javascript:history.go(-1)" class="go-back btn btn-primary">WRÓĆ</a>';
         }
         ?>
         <div class="container">
