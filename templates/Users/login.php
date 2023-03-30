@@ -1,9 +1,10 @@
 <?php
 
     echo $this->Html->css('form');
+    echo $this->Html->css('login');
 
     echo $this->Form->create(null, [
-        'class' => 'col-10 col-sm-6 col-lg-5 col-xl-3 col-xxl-2 position-absolute top-50 start-50 p-4 rounded-3 row d-flex justify-content-center',
+        'class' => 'col-10 col-sm-6 col-lg-5 col-xl-3 col-xxl-2 offset-lg-0 offset-xl-3 position-absolute top-50 start-50 p-4 rounded-3 row d-flex justify-content-center',
         'url' => [
             'controller' => 'Users',
             'action' => 'login',

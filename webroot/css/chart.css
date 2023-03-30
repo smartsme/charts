@@ -61,7 +61,7 @@ div.input {
 
 @media (min-width: 501px)  { 
     #chartContainer {
-        height: 700px !important;
+        height: 1000px !important;
     }
 }
 

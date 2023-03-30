@@ -1,21 +1,61 @@
 $(() => {
     const ctx = $('#chart');
-    const data = JSON.parse($('#data').val());
+    let data = JSON.parse($('#data').val());
     const labels = JSON.parse($('#labels').val());
+    const params = new URLSearchParams(window.location.search);
+    const startDate = params.get('start') ?? '2023-01-01';
+    const endDate = params.get('end') ?? `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
 
-    let datasets = [];
-    for (let d in data) {
-        datasets.push({
-            label: d,
-            data: data[d],
-            borderWidth: 1
-        })
+    $('select.currency').val(localStorage.getItem('currency') ?? 'PLN');
+
+    $.ajax({
+        url: `get-rates?start_date=${startDate}&end_date=${endDate}&currency=${localStorage.getItem('currency')}`,
+        success: (res) => {
+            console.log(res);
+            localStorage.setItem('rates', JSON.stringify(res));
+        }
+    });
+
+    const dataWithPrice = [
+        'value',
+        'price',
+        'first_transaction_rate',
+        'dkr',
+        'session_min',
+        'session_max',
+        'total_value_of_turnover',
+        'course',
+        'cro',
+        'cros',
+        'croz',
+        'rate_min',
+        'rate_max',
+    ];
+
+    function generateDatasets() {
+        data = JSON.parse($('#data').val());
+        let datasets = [];
+        for (let d in data) {
+            if (dataWithPrice.some(x => d.startsWith(x))) {
+                let rates = JSON.parse(localStorage.getItem('rates'));
+                for (let i = 0; i < data[d].length; i++) {
+                    data[d][i]['y'] = data[d][i]['y'] * +rates[data[d][i]['x'].substring(0, 10)];
+                }
+            }
+            datasets.push({
+                label: d,
+                data: data[d],
+                borderWidth: 1
+            })
+        }
+
+        return datasets;
     }
 
-    let params = new URLSearchParams(window.location.search);
+    let datasets = generateDatasets();
 
-    $('#start').val(params.get('start'));
-    $('#end').val(params.get('end'));
+    $('#start').val(startDate);
+    $('#end').val(endDate);
     $('#sum').prop('checked', JSON.parse(params.get('sum')));
     for (let i = 0; i < params.getAll('table').length; i++) {
         $(`input[data-table=${params.getAll('table')[i]}]`).prop('checked', true);
@@ -144,5 +184,20 @@ $(() => {
             }
         }
         chart.update();
+    })
+
+    $('select.currency').change(function() {
+        localStorage.setItem('currency', $(this).val());
+        $.ajax({
+            url: `get-rates?start_date=${startDate}&end_date=${endDate}&currency=${localStorage.getItem('currency')}`,
+            success: (res) => {
+                console.log(res);
+                localStorage.setItem('rates', JSON.stringify(res));
+                let datasets = generateDatasets();
+                chart.data.datasets = datasets;
+                chart.update()
+            }
+        });
+        
     })
 })

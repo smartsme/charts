@@ -334,7 +334,7 @@ class PagesController extends AppController
                     array_push($dates, $startDate . ' - ' . ($i + 1));
                 }
                 foreach ($tableCodePairs as $table => $code) {
-                    if (in_array($table, $hourlyTables)) {
+                    if (in_array($table, $hourlyTables) && $table != 'carbon_emissions' && $table != 'coal_api2') {
                         $sql = generateSql($table, $tablesColumns, true, $code, $startDate, $endDate, false, $this->request->getQuery('sum'));
                         $records = $connection->execute($sql)->fetchAll('assoc');
                         if ($records) {
@@ -344,7 +344,7 @@ class PagesController extends AppController
                             }
                         }
                     } else {
-                        $sql = generateSql($table, $tablesColumns, false, $code, $startDate, $endDate, true, $this->request->getQuery('sum'));
+                        $sql = generateSql($table, $tablesColumns, in_array($table, $hourlyTables), $code, $startDate, $endDate, true, $this->request->getQuery('sum'));
                         $records = $connection->execute($sql)->fetchAll('assoc');
                         $final = [];
                         for ($i = 0; $i < 24; $i++) {

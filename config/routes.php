@@ -48,6 +48,7 @@ return static function (RouteBuilder $routes) {
         $builder->connect('/', ['controller' => 'Pages', 'action' => 'home']);
         $builder->connect('/wykresy', ['controller' => 'Pages', 'action' => 'chart']);
         $builder->connect('/get-codes', ['controller' => 'Charts', 'action' => 'getCodes']);
+        $builder->connect('/get-rates', ['controller' => 'Charts', 'action' => 'getRates']);
         $builder->connect('/login', ['controller' => 'Users', 'action' => 'login']);
         $builder->connect('/logout', ['controller' => 'Users', 'action' => 'logout']);
         $builder->connect('/forgot-password', ['controller' => 'Users', 'action' => 'forgotPassword']);
