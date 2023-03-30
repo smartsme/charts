@@ -39,7 +39,7 @@ $(() => {
             if (dataWithPrice.some(x => d.startsWith(x))) {
                 let rates = JSON.parse(localStorage.getItem('rates'));
                 for (let i = 0; i < data[d].length; i++) {
-                    data[d][i]['y'] = data[d][i]['y'] * +rates[data[d][i]['x'].substring(0, 10)];
+                    data[d][i]['y'] = data[d][i]['y'] * +(rates ? rates[data[d][i]['x'].substring(0, 10)] : 1);
                 }
             }
             datasets.push({
