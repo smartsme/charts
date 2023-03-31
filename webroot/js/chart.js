@@ -94,6 +94,7 @@ $(() => {
                     if (d === 'value - brent_oil') {
                         data[d][i]['y'] = data[d][i]['y'] * rates['USD'][data[d][i]['x']] / rates[currency][data[d][i]['x']]
                     } else {
+                        console.log(rates);
                         data[d][i]['y'] = data[d][i]['y'] * rates[currency][data[d][i]['x']]
                     }
                 }

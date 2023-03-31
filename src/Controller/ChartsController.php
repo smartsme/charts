@@ -104,8 +104,8 @@ class ChartsController extends AppController
             $current = strtotime('+1 day', $current);
         }
 
-        $currencies = $this->getTableLocator()->get('Currencies')->find('all')->select('code')->group('code')->toList();
-        $values = $this->getTableLocator()->get('Currencies')->find('all')->select(['date', 'code', 'value'])->where("date BETWEEN '$startDate' AND '$endDate'")->toList();
+        $currencies = $this->getTableLocator()->get('Currencies')->find('all')->select('code')->group('code')->all()->toList();
+        $values = $this->getTableLocator()->get('Currencies')->find('all')->select(['date', 'code', 'value'])->where("date BETWEEN '$startDate' AND '$endDate'")->all()->toList();
         $avg = $this->getTableLocator()->get('Currencies')->find('all');
         $avg = $avg->select(['code', 'average' => $avg->func()->avg('value')])->group('code')->all()->toList();
         $averages = ['PLN' => []];
