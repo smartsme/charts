@@ -213,6 +213,9 @@ class PagesController extends AppController
                 'volume',
                 'price_change',
             ],
+            'brent_oil' => [
+                'value',
+            ],
         ];
 
         $hourlyTables = [
@@ -222,6 +225,7 @@ class PagesController extends AppController
             'prices_and_quantity_of_energy_in_the_balancing_market',
             'carbon_emissions',
             'coal_api2',
+            'brent_oil',
         ];
 
         if ($this->request->getQuery('table')) {
@@ -317,7 +321,7 @@ class PagesController extends AppController
             $data = [];
             $labels = [];
 
-            if (!array_diff(array_keys($tableCodePairs), $hourlyTables) && $startDate == $endDate && !count(array_intersect(['carbon_emissions', 'coal_api2'], array_keys($tableCodePairs)))) {
+            if (!array_diff(array_keys($tableCodePairs), $hourlyTables) && $startDate == $endDate && !count(array_intersect(['carbon_emissions', 'coal_api2', 'brent_oil'], array_keys($tableCodePairs)))) {
                 for ($i = 1; $i <= 24; $i++) {
                     array_push($labels, "$startDate - $i");
                 }
@@ -334,7 +338,7 @@ class PagesController extends AppController
                     array_push($dates, $startDate . ' - ' . ($i + 1));
                 }
                 foreach ($tableCodePairs as $table => $code) {
-                    if (in_array($table, $hourlyTables) && $table != 'carbon_emissions' && $table != 'coal_api2') {
+                    if (in_array($table, $hourlyTables) && $table != 'carbon_emissions' && $table != 'coal_api2' && $table != 'brent_oil') {
                         $sql = generateSql($table, $tablesColumns, true, $code, $startDate, $endDate, false, $this->request->getQuery('sum'));
                         $records = $connection->execute($sql)->fetchAll('assoc');
                         if ($records) {

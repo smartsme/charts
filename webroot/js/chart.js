@@ -6,12 +6,12 @@ $(() => {
     const startDate = params.get('start') ?? '2023-01-01';
     const endDate = params.get('end') ?? `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
 
-    $('select.currency').val(localStorage.getItem('currency') ?? 'PLN');
+    let currency = localStorage.getItem('currency') ?? 'PLN';
+    $('select.currency').val(currency);
 
     $.ajax({
-        url: `get-rates?start_date=${startDate}&end_date=${endDate}&currency=${localStorage.getItem('currency')}`,
+        url: `get-rates?start_date=${startDate}&end_date=${endDate}`,
         success: (res) => {
-            console.log(res);
             localStorage.setItem('rates', JSON.stringify(res));
         }
     });
@@ -39,7 +39,11 @@ $(() => {
             if (dataWithPrice.some(x => d.startsWith(x))) {
                 let rates = JSON.parse(localStorage.getItem('rates'));
                 for (let i = 0; i < data[d].length; i++) {
-                    data[d][i]['y'] = data[d][i]['y'] * +(rates ? rates[data[d][i]['x'].substring(0, 10)] : 1);
+                    if (d === 'value - brent_oil') {
+                        data[d][i]['y'] = data[d][i]['y'] * rates['USD'][data[d][i]['x']] / rates[currency][data[d][i]['x']]
+                    } else {
+                        data[d][i]['y'] = data[d][i]['y'] * rates[currency][data[d][i]['x']]
+                    }
                 }
             }
             datasets.push({
@@ -188,6 +192,7 @@ $(() => {
 
     $('select.currency').change(function() {
         localStorage.setItem('currency', $(this).val());
+        currency = $(this).val();
         $.ajax({
             url: `get-rates?start_date=${startDate}&end_date=${endDate}&currency=${localStorage.getItem('currency')}`,
             success: (res) => {

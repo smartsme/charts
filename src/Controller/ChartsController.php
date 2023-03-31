@@ -97,36 +97,42 @@ class ChartsController extends AppController
         $startDate = $this->request->getQuery('start_date');
         $endDate = $this->request->getQuery('end_date');
         $current = strtotime($startDate);
-        $rates = [];
+        $rates = ['PLN' => []];
 
         while ($current <= strtotime($endDate)) {
             $dates[] = date('Y-m-d', $current);
             $current = strtotime('+1 day', $current);
         }
 
-        function isDateInResult($date, $result)
-        {
-            foreach ($result as $r) {
-                if ($r['date'] == $date) {
-                    return true;
-                }
-            }
-
-            return false;
+        $currencies = $this->getTableLocator()->get('Currencies')->find('all')->select('code')->group('code')->toList();
+        $values = $this->getTableLocator()->get('Currencies')->find('all')->select(['date', 'code', 'value'])->where("date BETWEEN '$startDate' AND '$endDate'")->toList();
+        $avg = $this->getTableLocator()->get('Currencies')->find('all');
+        $avg = $avg->select(['code', 'average' => $avg->func()->avg('value')])->group('code')->all()->toList();
+        $averages = ['PLN' => []];
+        foreach ($avg as $cur) {
+            $averages[$cur->code] = $cur->average;
+        }
+        $arr = ['PLN' => []];
+        foreach ($currencies as $currency) {
+            $arr[$currency->code] = [];
+            $rates[$currency->code] = [];
         }
 
-        if ($this->request->getQuery('currency') == 'null' || $this->request->getQuery('currency') == 'PLN') {
+        foreach ($values as $value) {
+            $arr[$value->code][$value->date] = floatval($value->value);
+        }
+
+        foreach ($arr as $currency => $values) {
             for ($i = 0; $i < count($dates); $i++) {
-                $rates[$dates[$i]] = 1;
+                if (!isset($values[$dates[$i]])) {
+                    $values[$dates[$i]] = $averages[$currency];
+                }
+
+                if ($currency == 'PLN') {
+                    $values[$dates[$i]] = 1;
+                }
             }
-        } else {
-            $code = $this->request->getQuery('currency');
-            $values = $this->getTableLocator()->get('Currencies')->find('all')->select(['date', 'value'])->where("code = '$code' AND date BETWEEN '$startDate' AND '$endDate'")->all()->toList();
-            $avg = $this->getTableLocator()->get('Currencies')->find('all');
-            $avg = $avg->select(['average' => $avg->func()->avg('value')])->where("code = '$code'")->all()->toList();
-            for ($i = 0; $i < count($dates); $i++) {
-                $rates[$dates[$i]] = isDateInResult($dates[$i], $values) ? floatval($values[array_search($dates[$i], array_column($values, 'date'))]['value']) : $avg[0]->average;
-            }
+            $rates[$currency] = $values;
         }
 
         $response = $this->response;

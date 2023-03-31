@@ -104,6 +104,10 @@
                     <input type="checkbox" class="form-check-input" data-table="coal_api2">
                     <span>Coal (API2) CIF ARA (ARGUS-McCloskey) Futures</span>
                 </div>
+                <div class="input float-start w-100 shadow p-3 m-2 rounded-3">
+                    <input type="checkbox" class="form-check-input" data-table="brent_oil">
+                    <span>Ropa</span>
+                </div>
                 <div class="input">
                     <button id="submitBtn" class="btn btn-dark m-2">Wyświetl</button>
                 </div>
