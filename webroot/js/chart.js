@@ -32,10 +32,62 @@ $(() => {
         'rate_max',
     ];
 
+    const units = {
+        'value - brent_oil': 'USD/baryłka',
+        'value - carbon_emissions': 'EUR',
+        'price - coal_api2': 'USD',
+        'open - coal_api2': 'USD',
+        'high - coal_api2': 'USD',
+        'low - coal_api2': 'USD',
+        'volume': '?',
+        'first_transaction_rate': 'PLN/MWh',
+        'dkr': 'PLN/MWh',
+        'session_min': 'PLN/MWh',
+        'session_max': 'PLN/MWh',
+        'total_value_of_turnover': 'PLN',
+        'total_volumen': 'MWh',
+        'lop': 'MWh',
+        'course': 'PLN/MWh',
+        'change': '%',
+        'volume - electric_rdn_energy': 'MWh',
+        'wind': 'MWh',
+        'solar': 'MWh',
+        'Generacja': '?',
+        'Pompowanie': '?',
+        'ceps_export': 'MWh',
+        'ceps_import': 'MWh',
+        'seps_export': 'MWh',
+        'seps_import': 'MWh',
+        '50hertz_export': 'MWh',
+        '50hertz_import': 'MWh',
+        'svk_export': 'MWh',
+        'svk_import': 'MWh',
+        'nek_export': 'MWh',
+        'nek_import': 'MWh',
+        'litgrid_export': 'MWh',
+        'litgrid_import': 'MWh',
+        'predicted': 'MW',
+        'actual': 'MW',
+        'cro': 'PLN/MWh',
+        'cros': 'PLN/MWh',
+        'croz': 'PLN/MWh',
+        'contract_status': 'MW',
+        'imbalance': 'MW',
+        'course_change': '%',
+        'volume_change': '%',
+        'rate_min': 'PLN/MWh',
+        'rate_max': 'PLN/MWh',
+    };
+
+    let unqiueUnits = [];
+
     function generateDatasets() {
         data = JSON.parse($('#data').val());
         let datasets = [];
         for (let d in data) {
+            if (unqiueUnits.indexOf(getUnit(d)) == -1) {
+                unqiueUnits.push(getUnit(d));
+            }
             if (dataWithPrice.some(x => d.startsWith(x))) {
                 let rates = JSON.parse(localStorage.getItem('rates'));
                 for (let i = 0; i < data[d].length; i++) {
@@ -53,7 +105,16 @@ $(() => {
             })
         }
 
+        $('div#units').html(unqiueUnits.toString().replaceAll(',', ', '));
         return datasets;
+    }
+
+    function getUnit(s) {
+        for (let i = 0; i < Object.keys(units).length; i++) {
+            if(s.includes(Object.keys(units)[i])) {
+                return units[Object.keys(units)[i]];
+            }
+        }
     }
 
     let datasets = generateDatasets();

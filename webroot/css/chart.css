@@ -53,6 +53,13 @@ div.input {
     height: 100% !important;
 }
 
+div#units {
+    color: #fff;
+    position: absolute;
+    bottom: 200px;
+    right: 100%;
+}
+
 @media (max-width: 500px)  { 
     #chartContainer {
         min-height: 1000px !important;
@@ -63,5 +70,12 @@ div.input {
     #chartContainer {
         height: 1000px !important;
     }
+}
+
+@media (max-width: 960px) {
+    div#units {
+        bottom: 5%;
+        right: 50%;
+    } 
 }
 

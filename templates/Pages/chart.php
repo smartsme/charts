@@ -117,6 +117,7 @@
     <input type="hidden" value='<?=isset($data) ? json_encode($data) : '[]';?>' id="data"/>
     <input type="hidden" value='<?=isset($labels) ? json_encode($labels) : '[]';?>' id="labels"/>
     <div id="chartContainer" class="col-12 col-lg-10">
+        <div id="units"></div>
         <canvas id="chart"></canvas>
     </div>
 </div>
