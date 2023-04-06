@@ -33,21 +33,21 @@ $(() => {
     ];
 
     const units = {
-        'value - brent_oil': 'USD/baryłka',
-        'value - carbon_emissions': 'EUR',
-        'price - coal_api2': 'USD',
-        'open - coal_api2': 'USD',
-        'high - coal_api2': 'USD',
-        'low - coal_api2': 'USD',
+        'value - brent_oil': `${currency}/baryłka`,
+        'value - carbon_emissions': `${currency}`,
+        'price - coal_api2': `${currency}`,
+        'open - coal_api2': `${currency}`,
+        'high - coal_api2': `${currency}`,
+        'low - coal_api2': `${currency}`,
         'volume': '?',
-        'first_transaction_rate': 'PLN/MWh',
-        'dkr': 'PLN/MWh',
-        'session_min': 'PLN/MWh',
-        'session_max': 'PLN/MWh',
-        'total_value_of_turnover': 'PLN',
+        'first_transaction_rate': `${currency}/MWh`,
+        'dkr': `${currency}/MWh`,
+        'session_min': `${currency}/MWh`,
+        'session_max': `${currency}/MWh`,
+        'total_value_of_turnover': `${currency}`,
         'total_volumen': 'MWh',
         'lop': 'MWh',
-        'course': 'PLN/MWh',
+        'course': `${currency}/MWh`,
         'change': '%',
         'volume - electric_rdn_energy': 'MWh',
         'wind': 'MWh',
@@ -68,15 +68,15 @@ $(() => {
         'litgrid_import': 'MWh',
         'predicted': 'MW',
         'actual': 'MW',
-        'cro': 'PLN/MWh',
-        'cros': 'PLN/MWh',
-        'croz': 'PLN/MWh',
+        'cro': `${currency}/MWh`,
+        'cros': `${currency}/MWh`,
+        'croz': `${currency}/MWh`,
         'contract_status': 'MW',
         'imbalance': 'MW',
         'course_change': '%',
         'volume_change': '%',
-        'rate_min': 'PLN/MWh',
-        'rate_max': 'PLN/MWh',
+        'rate_min': `${currency}/MWh`,
+        'rate_max': `${currency}/MWh`,
     };
 
     let unqiueUnits = [];
@@ -106,7 +106,7 @@ $(() => {
             })
         }
 
-        $('div#units').html(unqiueUnits.toString().replaceAll(',', ', '));
+        $('div#units').html(unqiueUnits.toString().replaceAll(',', '<br/>'));
         return datasets;
     }
 
