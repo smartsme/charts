@@ -1,4 +1,4 @@
-<table class="table m-5">
+<table class="table my-5">
     <thead>
         <tr>
             <th scope='col'>L.p.</th>

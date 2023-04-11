@@ -39,7 +39,7 @@ $(() => {
         'open - coal_api2': `${currency}`,
         'high - coal_api2': `${currency}`,
         'low - coal_api2': `${currency}`,
-        'volume': '?',
+        'volume': 'K',
         'first_transaction_rate': `${currency}/MWh`,
         'dkr': `${currency}/MWh`,
         'session_min': `${currency}/MWh`,
@@ -52,8 +52,8 @@ $(() => {
         'volume - electric_rdn_energy': 'MWh',
         'wind': 'MWh',
         'solar': 'MWh',
-        'Generacja': '?',
-        'Pompowanie': '?',
+        'Generacja': 'MW',
+        'Pompowanie': 'MW',
         'ceps_export': 'MWh',
         'ceps_import': 'MWh',
         'seps_export': 'MWh',
@@ -75,6 +75,7 @@ $(() => {
         'imbalance': 'MW',
         'course_change': '%',
         'volume_change': '%',
+        'price_change': '%',
         'rate_min': `${currency}/MWh`,
         'rate_max': `${currency}/MWh`,
     };
@@ -106,7 +107,7 @@ $(() => {
             })
         }
 
-        $('div#units').html(unqiueUnits.toString().replaceAll(',', '<br/>'));
+        $('div#units').html(unqiueUnits.filter(x => x != undefined).toString().replaceAll(',', '<br/>'));
         return datasets;
     }
 
