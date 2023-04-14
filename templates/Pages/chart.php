@@ -7,15 +7,15 @@
 <div class="row d-flex justify-content-center">
     <div id="form" class="col-12 col-md-9 my-5 float-start rounded-3">
         <h1>Wykresy</h1>
-        <div class="input m-5 m-md-4 m-lg-4 m-xl-1 m-xxl-1">
+        <div class="input m-0 m-md-4 m-lg-4 m-xl-1 m-xxl-1">
             <span>Tryb lepszej wydajności(nie rysuje punktów na wykresie(Domyślnie wyłączone))</span>
             <input type="checkbox" id="draw" class="form-check-input">
         </div>
-        <div class="input m-5 m-md-4 m-lg-4 m-xl-1 m-xxl-1">
+        <div class="input m-0 m-md-4 m-lg-4 m-xl-1 m-xxl-1">
             <span>Używaj sumy zamiast średniej dla danych godzinowych</span>
             <input type="checkbox" id="sum" class="form-check-input" name="sum">
         </div>
-        <div class="input m-5 m-md-4 m-lg-4 m-xl-1 m-xxl-1">
+        <div class="input m-0 m-md-4 m-lg-4 m-xl-1 m-xxl-1">
             <span>Waluta</span>
             <select class="currency form-select">
                 <option value="PLN">PLN</option>

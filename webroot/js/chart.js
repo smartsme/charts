@@ -112,7 +112,7 @@ $(() => {
             })
         }
 
-        $('div#units').html(unqiueUnits.filter(x => x != undefined).toString().replaceAll(',', '<br/>'));
+        $('div#units').html(unqiueUnits.filter(x => x != undefined).map(x => `<p>${x}</p>`).toString().replaceAll(',', ''));
         return datasets;
     }
 
@@ -236,12 +236,19 @@ $(() => {
         },
         plugins: [{
             afterDraw: chart => {
+                let ctx = chart.ctx;
+                let yAxis = chart.scales.y;
+                let xAxis = chart.scales.x;
+                ctx.moveTo(xAxis.left, yAxis.getPixelForValue(0));
+                ctx.lineTo(xAxis.right, yAxis.getPixelForValue(0));
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+                ctx.restore();
+
                 if (chart.tooltip?._active?.length) {               
                     let x = chart.tooltip._active[0].element.x;
                     let y = chart.tooltip._active[0].element.y;            
-                    let yAxis = chart.scales.y;
-                    let xAxis = chart.scales.x;
-                    let ctx = chart.ctx;
                     ctx.save();
                     ctx.beginPath();
                     ctx.moveTo(x, yAxis.top);
@@ -253,6 +260,19 @@ $(() => {
                     ctx.lineWidth = 0.5;
                     ctx.strokeStyle = '#a3a3a3';
                     ctx.stroke();
+                    ctx.restore();
+                }
+                if (chart.data.datasets.length === 0) {
+                    let width = chart.width;
+                    let height = chart.height
+                    
+                    ctx.save();
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = 'white';
+                    ctx.font = '20px Comfortaa';
+                    ctx.fillText('Brak danych', width / 2, height / 2);
+                    ctx.fillText('spełniających podane kryteria', width / 2, height / 2 + 35);
                     ctx.restore();
                 }
             }

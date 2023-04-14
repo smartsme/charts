@@ -80,7 +80,7 @@ class ChartsController extends AppController
     public function getCodes()
     {
         $table = $this->request->getQuery('table');
-        $codes = $this->getTableLocator()->get(lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $table)))))->find('all')->select('code')->group('code')->order('code')->all()->toList();
+        $codes = $this->getTableLocator()->get(ucfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $table)))))->find('all')->select('code')->group('code')->order('code')->all()->toList();
         $formattedCodes = [];
         for ($i = 0; $i < count($codes); $i++) {
             if ($table == 'rdn_gas_contract') {

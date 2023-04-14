@@ -210,7 +210,7 @@ class GetChartDataComponent extends Component
         }
 
         if ($repeat) {
-            return $this->repeatData($table, $formattedData);
+            return $this->repeatData($table, $formattedData, $code);
         }
 
         return $formattedData;
@@ -236,7 +236,7 @@ class GetChartDataComponent extends Component
         }
 
         if ($repeat) {
-            return $this->repeatData($table, $formattedData);
+            return $this->repeatData($table, $formattedData, $code);
         }
 
         return $formattedData;
@@ -304,7 +304,7 @@ class GetChartDataComponent extends Component
         }
 
         if ($repeat) {
-            return $this->repeatData($table, $formattedData);
+            return $this->repeatData($table, $formattedData, $code);
         }
 
         return $formattedData;
@@ -396,7 +396,7 @@ class GetChartDataComponent extends Component
         }
 
         if ($repeat) {
-            return $this->repeatData($table, $formattedData);
+            return $this->repeatData($table, $formattedData, $code);
         }
 
         return $formattedData;
@@ -455,7 +455,7 @@ class GetChartDataComponent extends Component
         }
 
         if ($repeat) {
-            return $this->repeatData($table, $formattedData);
+            return $this->repeatData($table, $formattedData, $code);
         }
 
         return $formattedData;
@@ -481,7 +481,7 @@ class GetChartDataComponent extends Component
         }
 
         if ($repeat) {
-            return $this->repeatData($table, $formattedData);
+            return $this->repeatData($table, $formattedData, $code);
         }
 
         return $formattedData;
@@ -507,7 +507,7 @@ class GetChartDataComponent extends Component
         }
 
         if ($repeat) {
-            return $this->repeatData($table, $formattedData);
+            return $this->repeatData($table, $formattedData, $code);
         }
 
         return $formattedData;
@@ -533,7 +533,7 @@ class GetChartDataComponent extends Component
         }
 
         if ($repeat) {
-            return $this->repeatData($table, $formattedData);
+            return $this->repeatData($table, $formattedData, $code);
         }
 
         return $formattedData;
@@ -559,7 +559,7 @@ class GetChartDataComponent extends Component
         }
 
         if ($repeat) {
-            return $this->repeatData($table, $formattedData);
+            return $this->repeatData($table, $formattedData, $code);
         }
 
         return $formattedData;
@@ -586,9 +586,9 @@ class GetChartDataComponent extends Component
         return $array;
     }
 
-    private function repeatData($table, $data)
+    private function repeatData($table, $data, $code = null)
     {
-        $tempArr = $this->createEmptyArray($table);
+        $tempArr = $this->createEmptyArray($table, $code);
         foreach ($data as $column => $record) {
             if (isset($record[0])) {
                 $date = $record[0]['x'];

@@ -153,7 +153,7 @@ class PagesController extends AppController
 
                 if (!in_array($tables[$i]['tableName'], $hourlyTables) && !in_array($tables[$i]['tableName'], $newTables)) {
                     for ($j = 0; $j < count($tables[$i]['codes']); $j++) {
-                        $data = array_merge($data, $this->GetChartData->$tableName($startDate ?? DEFAULT_START_DATE, $endDate ?? DEFAULT_END_DATE, $tables[$i]['codes'][$j], $startDate == $endDate && $hourlyTable));
+                        $data = array_merge($data, $this->GetChartData->$tableName($startDate ?? DEFAULT_START_DATE, $endDate ?? DEFAULT_END_DATE, $tables[$i]['codes'][$j], $startDate == $endDate));
                     }
                 }
             }
@@ -164,8 +164,9 @@ class PagesController extends AppController
 
             $this->set('labels', $labels ?? []);
             $this->set('data', $data ?? []);
-            $this->set('title', 'Wykresy');
         }
+
+        $this->set('title', 'Wykresy');
     }
 
     private function dateRange($first, $last, $step = '+1 day', $output_format = 'Y-m-d')
