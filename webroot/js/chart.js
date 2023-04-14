@@ -39,7 +39,7 @@ $(() => {
         'open - coal_api2': `${currency}`,
         'high - coal_api2': `${currency}`,
         'low - coal_api2': `${currency}`,
-        'volume': 'K',
+        'volume': 'kL',
         'first_transaction_rate': `${currency}/MWh`,
         'dkr': `${currency}/MWh`,
         'session_min': `${currency}/MWh`,
@@ -89,17 +89,16 @@ $(() => {
             if (unqiueUnits.indexOf(getUnit(d)) == -1) {
                 unqiueUnits.push(getUnit(d));
             }
-            if (dataWithPrice.some(x => d.startsWith(x))) {
-                let rates = JSON.parse(localStorage.getItem('rates'));
-                for (let i = 0; i < data[d].length; i++) {
-                    if (d === 'value - brent_oil') {
-                        data[d][i]['y'] = data[d][i]['y'] * rates['USD'][data[d][i]['x']] / rates[currency][data[d][i]['x']]
-                    } else {
-                        console.log(rates);
-                        data[d][i]['y'] = data[d][i]['y'] * rates[currency][data[d][i]['x']]
-                    }
-                }
-            }
+            // if (dataWithPrice.some(x => d.startsWith(x))) {
+            //     let rates = JSON.parse(localStorage.getItem('rates'));
+            //     for (let i = 0; i < data[d].length; i++) {
+            //         if (d === 'value - brent_oil') {
+            //             data[d][i]['y'] = +data[d][i]['y'] * rates['USD'][data[d][i]['x']] / rates[currency][data[d][i]['x']]
+            //         } else {
+            //             data[d][i]['y'] = +data[d][i]['y'] * rates[currency][data[d][i]['x']]
+            //         }
+            //     }
+            // }
             datasets.push({
                 label: d,
                 data: data[d],
