@@ -79,13 +79,19 @@ class ChartsController extends AppController
      */
     public function getCodes()
     {
-        $connection = ConnectionManager::get('default');
         $table = $this->request->getQuery('table');
-        $code = $table == 'rdn_gas_contract' ? 'LEFT(`code`, 3)' : '`code`';
-        $results = $connection->execute("SELECT DISTINCT($code) FROM `$table` ORDER BY `code`")->fetchAll('num');
-
+        $codes = $this->getTableLocator()->get(lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $table)))))->find('all')->select('code')->group('code')->order('code')->all()->toList();
+        $formattedCodes = [];
+        for ($i = 0; $i < count($codes); $i++) {
+            if ($table == 'rdn_gas_contract') {
+                preg_match('/[A-Z]{3}_.*(?=_)/', $codes[$i]['code'], $code);
+                array_push($formattedCodes, $code[0]);
+            } else {
+                array_push($formattedCodes, $codes[$i]['code']);
+            }
+        }
         $response = $this->response;
-        $response = $response->withType('application/json')->withStringBody(json_encode($results));
+        $response = $response->withType('application/json')->withStringBody(json_encode(array_values(array_unique($formattedCodes))));
 
         return $response;
     }

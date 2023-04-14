@@ -26,6 +26,11 @@ div.input {
     float: right;
 }
 
+.selection, .selection > * {
+    width: 100% !important;
+    font-size: .95em;
+}
+
 #form > div.input {
     margin: 5px;
     padding: 5px;

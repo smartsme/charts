@@ -12,6 +12,8 @@
         echo $this->Html->script('https://cdn.jsdelivr.net/npm/chart.js');
         echo $this->Html->script('https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js');
         echo $this->Html->css('https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css');
+        echo $this->Html->css('https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css');
+        echo $this->Html->script('https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js');
         echo $this->Html->css('main');
         echo $this->fetch('meta');
         echo $this->fetch('css');

@@ -194,12 +194,11 @@ class GetChartDataComponent extends Component
     public function electricOtfEnergy($startDate, $endDate, $code, $repeat = false)
     {
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', __FUNCTION__));
-        $formattedData = $this->createEmptyArray($table);
+        $formattedData = $this->createEmptyArray($table, $code);
         $data = $this->formatDate(\Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all')->select(array_merge(['date'], TABLES_COLUMNS[$table]))->where(["`date` BETWEEN '$startDate' AND '$endDate'", 'code' => $code])->all()->toList());
-
         foreach (TABLES_COLUMNS[$table] as $column) {
             foreach ($data as $record) {
-                array_push($formattedData[$column . " - $table"], [
+                array_push($formattedData[$column . " - $table - $code"], [
                     'x' => $record['date'],
                     'y' => $record[$column],
                 ]);
@@ -220,12 +219,12 @@ class GetChartDataComponent extends Component
     public function electricRdnEnergy($startDate, $endDate, $code, $repeat = false)
     {
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', __FUNCTION__));
-        $formattedData = $this->createEmptyArray($table);
+        $formattedData = $this->createEmptyArray($table, $code);
         $data = $this->formatDate(\Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all')->select(array_merge(['date'], TABLES_COLUMNS[$table]))->where(["`date` BETWEEN '$startDate' AND '$endDate'", 'code' => $code])->all()->toList());
 
         foreach (TABLES_COLUMNS[$table] as $column) {
             foreach ($data as $record) {
-                array_push($formattedData[$column . " - $table"], [
+                array_push($formattedData[$column . " - $table - $code"], [
                     'x' => $record['date'],
                     'y' => $record[$column],
                 ]);
@@ -248,7 +247,7 @@ class GetChartDataComponent extends Component
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', __FUNCTION__));
         $formattedData = $this->createEmptyArray($table);
         $query = \Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all');
-        $formatField = fn($field) => [$field => !$group ? "ROUND(`$field`, 2)" : 'ROUND(' . ($sum ? 'SUM' : 'AVG') . "(`$field`), 2)"];
+        $formatField = fn($field) => [$field => !$group ? "ROUND(`$field`, 2)" : 'ROUND(' . (filter_var($sum, FILTER_VALIDATE_BOOLEAN) ? 'SUM' : 'AVG') . "(`$field`), 2)"];
         $query = $query->select([
             'date',
             ...array_merge(...array_map($formatField, TABLES_COLUMNS[$table])),
@@ -276,17 +275,47 @@ class GetChartDataComponent extends Component
         return $formattedData;
     }
 
-    // public function generationOfPowerGenerationUnits($startDate, $endDate, $repeat = false)
-    // {
-    //     return $amount1 + $amount2;
-    // }
+    public function generationOfPowerGenerationUnits($startDate, $endDate, $code, $repeat = false)
+    {
+        $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', __FUNCTION__));
+        $formattedData = $this->createEmptyArray($table, $code);
+        $roundedHours = ['power' => 'ROUND((`h1` + `h2` + `h3` + `h4` + `h5` + `h6` + `h7` + `h8` + `h9` + `h10` + `h11` + `h12` + `h13` + `h14` + `h15` + `h16` + `h17` + `h18` + `h19` + `h20` + `h21` + `h22` + `h23` + `h24`) / 24, 2)'];
+        $generation = $this->formatDate(\Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all')->select(array_merge(['date'], $roundedHours))->where(["`date` BETWEEN '$startDate' AND '$endDate'", 'code' => $code, 'mode' => 'Generacja'])->all()->toList());
+        $pumping = $this->formatDate(\Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all')->select(array_merge(['date'], $roundedHours))->where(["`date` BETWEEN '$startDate' AND '$endDate'", 'code' => $code, 'mode' => 'Pompowanie'])->all()->toList());
+
+        foreach ($generation as $record) {
+            array_push($formattedData["Generacja - $table - $code"], [
+                'x' => $record['date'],
+                'y' => $record['power'],
+            ]);
+        }
+
+        foreach ($pumping as $record) {
+            array_push($formattedData["Pompowanie - $table - $code"], [
+                'x' => $record['date'],
+                'y' => $record['power'],
+            ]);
+        }
+
+        $formattedData = array_filter(array_map('array_filter', $formattedData));
+
+        if (!array_filter($formattedData)) {
+            return [];
+        }
+
+        if ($repeat) {
+            return $this->repeatData($table, $formattedData);
+        }
+
+        return $formattedData;
+    }
 
     public function interSystemExchangeOfPowerFlows($startDate, $endDate, $sum = false, $group = true)
     {
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', __FUNCTION__));
         $formattedData = $this->createEmptyArray($table);
         $query = \Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all');
-        $formatField = fn($field) => [$field => !$group ? "ROUND(`$field`, 2)" : 'ROUND(' . ($sum ? 'SUM' : 'AVG') . "(`$field`), 2)"];
+        $formatField = fn($field) => [$field => !$group ? "ROUND(`$field`, 2)" : 'ROUND(' . (filter_var($sum, FILTER_VALIDATE_BOOLEAN) ? 'SUM' : 'AVG') . "(`$field`), 2)"];
         $query = $query->select([
             'date',
             ...array_merge(...array_map($formatField, TABLES_COLUMNS[$table])),
@@ -319,7 +348,7 @@ class GetChartDataComponent extends Component
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', __FUNCTION__));
         $formattedData = $this->createEmptyArray($table);
         $query = \Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all');
-        $formatField = fn($field) => [$field => !$group ? "ROUND(`$field`, 2)" : 'ROUND(' . ($sum ? 'SUM' : 'AVG') . "(`$field`), 2)"];
+        $formatField = fn($field) => [$field => !$group ? "ROUND(`$field`, 2)" : 'ROUND(' . (filter_var($sum, FILTER_VALIDATE_BOOLEAN) ? 'SUM' : 'AVG') . "(`$field`), 2)"];
         $query = $query->select([
             'date',
             ...array_merge(...array_map($formatField, TABLES_COLUMNS[$table])),
@@ -350,12 +379,12 @@ class GetChartDataComponent extends Component
     public function otfGas($startDate, $endDate, $code, $repeat = false)
     {
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', __FUNCTION__));
-        $formattedData = $this->createEmptyArray($table);
+        $formattedData = $this->createEmptyArray($table, $code);
         $data = $this->formatDate(\Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all')->select(array_merge(['date'], TABLES_COLUMNS[$table]))->where(["`date` BETWEEN '$startDate' AND '$endDate'", 'code' => $code])->all()->toList());
 
         foreach (TABLES_COLUMNS[$table] as $column) {
             foreach ($data as $record) {
-                array_push($formattedData[$column . " - $table"], [
+                array_push($formattedData[$column . " - $table - $code"], [
                     'x' => $record['date'],
                     'y' => $record[$column],
                 ]);
@@ -378,7 +407,7 @@ class GetChartDataComponent extends Component
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', __FUNCTION__));
         $formattedData = $this->createEmptyArray($table);
         $query = \Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all');
-        $formatField = fn($field) => [$field => !$group ? "ROUND(`$field`, 2)" : 'ROUND(' . ($sum ? 'SUM' : 'AVG') . "(`$field`), 2)"];
+        $formatField = fn($field) => [$field => !$group ? "ROUND(`$field`, 2)" : 'ROUND(' . (filter_var($sum, FILTER_VALIDATE_BOOLEAN) ? 'SUM' : 'AVG') . "(`$field`), 2)"];
         $query = $query->select([
             'date',
             ...array_merge(...array_map($formatField, TABLES_COLUMNS[$table])),
@@ -409,12 +438,12 @@ class GetChartDataComponent extends Component
     public function rdbGas($startDate, $endDate, $code, $repeat = false)
     {
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', __FUNCTION__));
-        $formattedData = $this->createEmptyArray($table);
+        $formattedData = $this->createEmptyArray($table, $code);
         $data = $this->formatDate(\Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all')->select(array_merge(['date'], TABLES_COLUMNS[$table]))->where(["`date` BETWEEN '$startDate' AND '$endDate'", 'code' => $code])->all()->toList());
 
         foreach (TABLES_COLUMNS[$table] as $column) {
             foreach ($data as $record) {
-                array_push($formattedData[$column . " - $table"], [
+                array_push($formattedData[$column . " - $table - $code"], [
                     'x' => $record['date'],
                     'y' => $record[$column],
                 ]);
@@ -435,12 +464,12 @@ class GetChartDataComponent extends Component
     public function rdnGasContract($startDate, $endDate, $code, $repeat = false)
     {
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', __FUNCTION__));
-        $formattedData = $this->createEmptyArray($table);
+        $formattedData = $this->createEmptyArray($table, $code);
         $data = $this->formatDate(\Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all')->select(array_merge(['date'], TABLES_COLUMNS[$table]))->where(["`date` BETWEEN '$startDate' AND '$endDate'", "`code` LIKE '$code%'"])->all()->toList());
 
         foreach (TABLES_COLUMNS[$table] as $column) {
             foreach ($data as $record) {
-                array_push($formattedData[$column . " - $table"], [
+                array_push($formattedData[$column . " - $table - $code"], [
                     'x' => $record['date'],
                     'y' => $record[$column],
                 ]);
@@ -461,12 +490,12 @@ class GetChartDataComponent extends Component
     public function rdnGasIndex($startDate, $endDate, $code, $repeat = false)
     {
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', __FUNCTION__));
-        $formattedData = $this->createEmptyArray($table);
+        $formattedData = $this->createEmptyArray($table, $code);
         $data = $this->formatDate(\Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all')->select(array_merge(['date'], TABLES_COLUMNS[$table]))->where(["`date` BETWEEN '$startDate' AND '$endDate'", 'code' => $code])->all()->toList());
 
         foreach (TABLES_COLUMNS[$table] as $column) {
             foreach ($data as $record) {
-                array_push($formattedData[$column . " - $table"], [
+                array_push($formattedData[$column . " - $table - $code"], [
                     'x' => $record['date'],
                     'y' => $record[$column],
                 ]);
@@ -487,12 +516,12 @@ class GetChartDataComponent extends Component
     public function propertyRightsOfRpmOffSession($startDate, $endDate, $code, $repeat = false)
     {
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', __FUNCTION__));
-        $formattedData = $this->createEmptyArray($table);
+        $formattedData = $this->createEmptyArray($table, $code);
         $data = $this->formatDate(\Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all')->select(array_merge(['date'], TABLES_COLUMNS[$table]))->where(["`date` BETWEEN '$startDate' AND '$endDate'", 'code' => $code])->all()->toList());
 
         foreach (TABLES_COLUMNS[$table] as $column) {
             foreach ($data as $record) {
-                array_push($formattedData[$column . " - $table"], [
+                array_push($formattedData[$column . " - $table - $code"], [
                     'x' => $record['date'],
                     'y' => $record[$column],
                 ]);
@@ -513,12 +542,12 @@ class GetChartDataComponent extends Component
     public function propertyRightsOfRpmSession($startDate, $endDate, $code, $repeat = false)
     {
         $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', __FUNCTION__));
-        $formattedData = $this->createEmptyArray($table);
+        $formattedData = $this->createEmptyArray($table, $code);
         $data = $this->formatDate(\Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst(__FUNCTION__))->find('all')->select(array_merge(['date'], TABLES_COLUMNS[$table]))->where(["`date` BETWEEN '$startDate' AND '$endDate'", 'code' => $code])->all()->toList());
 
         foreach (TABLES_COLUMNS[$table] as $column) {
             foreach ($data as $record) {
-                array_push($formattedData[$column . " - $table"], [
+                array_push($formattedData[$column . " - $table - $code"], [
                     'x' => $record['date'],
                     'y' => $record[$column],
                 ]);
@@ -547,11 +576,11 @@ class GetChartDataComponent extends Component
         return $data;
     }
 
-    private function createEmptyArray($table)
+    private function createEmptyArray($table, $code = null)
     {
         $array = [];
         foreach (TABLES_COLUMNS[$table] as $column) {
-            $array["$column - $table"] = [];
+            $array["$column - $table" . ($code ? " - $code" : '')] = [];
         }
 
         return $array;

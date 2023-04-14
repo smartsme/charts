@@ -6,6 +6,12 @@ $(() => {
     const startDate = params.get('start') ?? '2023-01-01';
     const endDate = params.get('end') ?? `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
 
+    $('select.code').each(function() {
+        $(this).select2({
+            placeholder: 'Wybierz kod',
+        });
+    });
+
     let currency = localStorage.getItem('currency') ?? 'PLN';
     $('select.currency').val(currency);
 
@@ -123,8 +129,14 @@ $(() => {
     $('#start').val(startDate);
     $('#end').val(endDate);
     $('#sum').prop('checked', JSON.parse(params.get('sum')));
-    for (let i = 0; i < params.getAll('table').length; i++) {
-        $(`input[data-table=${params.getAll('table')[i]}]`).prop('checked', true);
+    let tables = JSON.parse(params.get('tables'));
+    if (tables) {
+        for (let i = 0; i < tables.length; i++) {
+            $(`input[data-table=${tables[i].tableName}]`).prop('checked', true);
+            if (tables[i]?.codes) {
+                $(`#${tables[i].tableName}`).select2().val(tables[i].codes).trigger('change');
+            }
+        }
     }
 
     for (let i = 0; i < $('input[data-daily=true]').siblings('select').length; i++) {
@@ -146,22 +158,27 @@ $(() => {
     }
 
     $('#submitBtn').click(function() {
-        params.delete('table');
-        params.delete('code');
-        params.delete('mode');
+        let tables = [];
         $('input:checked:not(#draw):not(#sum)').each(function() {
-            params.append('table', $(this).data('table'));
-            if ($(this).siblings('.code').length) {
-                params.append('code', $(this).siblings('.code').eq(0).val());
-            }
-            if ($(this).siblings('.mode').length) {
-                params.append('mode', $(this).siblings('.mode').eq(0).val());
-            }
+            tables.push({ tableName : $(this).data('table'), codes: $(this).siblings('.code').eq(0).val() })
         })
+        // params.delete('table');
+        // params.delete('code');
+        // params.delete('mode');
+        // $('input:checked:not(#draw):not(#sum)').each(function() {
+        //     params.append('table', $(this).data('table'));
+        //     if ($(this).siblings('.code').length) {
+        //         params.append('code', $(this).siblings('.code').eq(0).val());
+        //     }
+        //     if ($(this).siblings('.mode').length) {
+        //         params.append('mode', $(this).siblings('.mode').eq(0).val());
+        //     }
+        // })
         params.set('start', $('#start').val());
         params.set('end', $('#end').val());
         params.set('sum', $('#sum').is(':checked'));
-        location.replace(`${window.location.origin}${window.location.pathname}?${params.toString()}`)
+        params.set('tables', JSON.stringify(tables));
+        location.replace(`${window.location.origin}${window.location.pathname}?${params.toString()}`);
     });
 
     const chart = new Chart(ctx, {

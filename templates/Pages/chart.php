@@ -52,49 +52,49 @@
                 <div class="input float-start w-100 shadow p-3 m-2 rounded-3">
                     <input type="checkbox" class="form-check-input" data-table="generation_of_power_generation_units" data-daily="true">
                     <span>Generacja jednostek wytwórczych</span>
-                    <select class="code form-select"></select>
+                    <select class="code form-select" multiple="multiple" id="generation_of_power_generation_units"></select>
                 </div>
                 <div class="input float-start w-100 shadow p-3 m-2 rounded-3">
                     <input type="checkbox" class="form-check-input" data-table="electric_otf_energy" data-daily="true">
                     <span>Energia elektryczna OTF</span>
-                    <select class='code form-select'></select>
+                    <select class="code form-select" multiple="multiple" id="electric_otf_energy"></select>
                 </div>
                 <div class="input float-start w-100 shadow p-3 m-2 rounded-3">
                     <input type="checkbox" class="form-check-input" data-table="electric_rdn_energy" data-daily="true">
                     <span>Energia elektryczna RDN</span>
-                    <select class='code form-select'></select>
+                    <select class="code form-select" multiple="multiple" id="electric_rdn_energy"></select>
                 </div>
             </div>
             <div class="col col-12 col-xxl-6 float-start px-4 pt-xxl-4 pb-4">
                 <div class="input float-start w-100 shadow p-3 m-2 rounded-3">
                     <input type="checkbox" class="form-check-input" data-table="otf_gas" data-daily="true">
                     <span>Gaz OTF</span>
-                    <select class='code form-select'></select>
+                    <select class="code form-select" multiple="multiple" id="otf_gas"></select>
                 </div>
                 <div class="input float-start w-100 shadow p-3 m-2 rounded-3">
                     <input type="checkbox" class="form-check-input" data-table="property_rights_of_rpm_off_session" data-daily="true">
                     <span>Prawa majątkowe RPM poza-sesyjne</span>
-                    <select class='code form-select'></select>
+                    <select class="code form-select" multiple="multiple" id="property_rights_of_rpm_off_session"></select>
                 </div>
                 <div class="input float-start w-100 shadow p-3 m-2 rounded-3">
                     <input type="checkbox" class="form-check-input" data-table="property_rights_of_rpm_session" data-daily="true">
                     <span>Prawa majątkowe RPM sesyjne</span>
-                    <select class='code form-select'></select>
+                    <select class="code form-select" multiple="multiple" id="property_rights_of_rpm_session"></select>
                 </div>
                 <div class="input float-start w-100 shadow p-3 m-2 rounded-3">
                     <input type="checkbox" class="form-check-input" data-table="rdb_gas" data-daily="true">
                     <span>Gaz RDB</span>
-                    <select class='code form-select'></select>
+                    <select class="code form-select" multiple="multiple" id="rdb_gas"></select>
                 </div>
                 <div class="input float-start w-100 shadow p-3 m-2 rounded-3">
                     <input type="checkbox" class="form-check-input" data-table="rdn_gas_contract" data-daily="true">
                     <span>Gaz RDN kontrakty</span>
-                    <select class='code form-select'></select>
+                    <select class="code form-select" multiple="multiple" id="rdn_gas_contract"></select>
                 </div>
                 <div class="input float-start w-100 shadow p-3 m-2 rounded-3">
                     <input type="checkbox" class="form-check-input" data-table="rdn_gas_index" data-daily="true">
                     <span>Gaz RDN indeksy</span>
-                    <select class='code form-select'></select>
+                    <select class="code form-select" multiple="multiple" id="rdn_gas_index"></select>
                 </div>
                 <div class="input float-start w-100 shadow p-3 m-2 rounded-3">
                     <input type="checkbox" class="form-check-input" data-table="carbon_emissions">
