@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Controller\Component;
 
@@ -237,7 +238,6 @@ class GetChartDataComponent extends Component
     public function generateNewTableData($table, $startDate, $endDate, $repeat = false)
     {
         $tableSnakeCase = $this->StringFunctions->camelCaseToSnakeCase($table);
-        debug($tableSnakeCase);
         $formattedData = $this->createEmptyArray($tableSnakeCase);
         $data = $this->formatDate(\Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst($table))->find('all')->select(array_merge(['date'], TABLES_COLUMNS[$tableSnakeCase]))->where("`date` BETWEEN '$startDate' AND '$endDate'")->all()->toList());
 
@@ -312,6 +312,7 @@ class GetChartDataComponent extends Component
         $tableSnakeCase = $this->StringFunctions->camelCaseToSnakeCase($table);
         $formattedData = $this->createEmptyArray($tableSnakeCase);
         $query = \Cake\ORM\TableRegistry::getTableLocator()->get(ucfirst($table))->find('all');
+        //Function to correctly format fields
         $formatField = fn($field) => [$field => !$group ? "ROUND(`$field`, 2)" : 'ROUND(' . (filter_var($sum, FILTER_VALIDATE_BOOLEAN) ? 'SUM' : 'AVG') . "(`$field`), 2)"];
         $query = $query->select([
             'date',

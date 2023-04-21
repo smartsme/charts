@@ -99,6 +99,11 @@ class UsersController extends AppController
         }
     }
 
+    /**
+     * Admin panel page
+     *
+     * @return void
+     */
     public function panel()
     {
         $users = $this->getTableLocator()->get('Users')->find();
@@ -106,6 +111,11 @@ class UsersController extends AppController
         $this->set('title', 'Panel administratora');
     }
 
+    /**
+     * Create user page
+     *
+     * @return \Cake\Http\Response
+     */
     public function create()
     {
         if ($this->request->is('post')) {
@@ -173,6 +183,11 @@ class UsersController extends AppController
         $this->set('title', 'Stwórz użytkownika');
     }
 
+    /**
+     * Update user page
+     *
+     * @return \Cake\Http\Response
+     */
     public function update()
     {
         if ($this->request->is('post')) {
@@ -243,6 +258,11 @@ class UsersController extends AppController
         $this->set('title', 'Zaaktualizuj dane użytkownika');
     }
 
+    /**
+     * Delete user page
+     *
+     * @return \Cake\Http\Response
+     */
     public function delete()
     {
         if ($this->request->is('post')) {
@@ -276,6 +296,11 @@ class UsersController extends AppController
         $this->set('title', 'Usuń użytkownika');
     }
 
+    /**
+     * List user page
+     *
+     * @return void
+     */
     public function list()
     {
         $users = $this->getTableLocator()->get('Users')->find('all')->select(['login', 'first_name', 'last_name', 'email'])->all()->toList();

@@ -20,7 +20,6 @@ define('DEFAULT_START_DATE', date('Y') . '-01-01');
 define('DEFAULT_END_DATE', date('Y-m-d'));
 
 use Cake\Core\Configure;
-use Cake\Datasource\ConnectionManager;
 use Cake\Http\Exception\ForbiddenException;
 use Cake\Http\Exception\NotFoundException;
 use Cake\Http\Response;

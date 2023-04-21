@@ -103,6 +103,11 @@ class UsersController extends AppController
         }
     }
 
+    /**
+     * Login page
+     *
+     * @return \Cake\Http\Response
+     */
     public function login()
     {
         $session = $this->request->getSession();
@@ -129,11 +134,21 @@ class UsersController extends AppController
         $this->set('title', 'Logowanie');
     }
 
+    /**
+     * Logout page
+     *
+     * @return \Cake\Http\Response
+     */
     public function logout()
     {
         return $this->redirect($this->Auth->logout());
     }
 
+    /**
+     * Forgot password page
+     *
+     * @return \Cake\Http\Response
+     */
     public function forgotPassword()
     {
         if ($this->request->is('post')) {
@@ -162,7 +177,7 @@ class UsersController extends AppController
                     ->setTo($email)
                     ->setEmailFormat('html')
                     ->setSubject('Pomoc w odzyskiwaniu hasła smartsme')
-                    ->deliver("Hello<br/>Kliknj tutaj żeby zresetować swoje hasło<br/><br/><a href='https://www.smartsme.pl/reset-password/$token'>Resetuj hasło</a>");
+                    ->deliver("Kliknj tutaj żeby zresetować swoje hasło<br/><br/><a href='https://www.smartsme.pl/reset-password/$token'>Resetuj hasło</a>");
                 }
                 $this->Flash->success('<p class="text-success text-center">Wiadomość została wysłana na podany adres email!</p>', [
                     'key' => 'forgotPassword',
@@ -184,6 +199,12 @@ class UsersController extends AppController
         $this->set('title', 'Zapomniałem hasła');
     }
 
+    /**
+     * Reset password page
+     *
+     * @param string $token User token
+     * @return \Cake\Http\Response
+     */
     public function resetPassword($token)
     {
         if ($this->request->is('post')) {

@@ -73,9 +73,9 @@ class ChartsController extends AppController
     }
 
     /**
-     * Get codes page
+     * Function to retrieve all codes
      *
-     * @return json
+     * @return \JSON
      */
     public function getCodes()
     {
@@ -84,6 +84,7 @@ class ChartsController extends AppController
         $formattedCodes = [];
         for ($i = 0; $i < count($codes); $i++) {
             if ($table == 'rdn_gas_contract') {
+                //For certain table, each day had a different code so we take the code up to the second underscore so instead of GAS_BASE_1-23 we have GAS_BASE
                 preg_match('/[A-Z]{3}_.*(?=_)/', $codes[$i]['code'], $code);
                 array_push($formattedCodes, $code[0]);
             } else {
@@ -96,6 +97,11 @@ class ChartsController extends AppController
         return $response;
     }
 
+    /**
+     * Function to retrieve all currency rates
+     *
+     * @return \JSON
+     */
     public function getRates()
     {
         $this->autoRender = false;
@@ -112,9 +118,11 @@ class ChartsController extends AppController
 
         $currencies = $this->getTableLocator()->get('Currencies')->find('all')->select('code')->group('code')->all()->toList();
         $values = $this->getTableLocator()->get('Currencies')->find('all')->select(['date', 'code', 'value'])->where("date BETWEEN '$startDate' AND '$endDate'")->all()->toList();
+        //Selecting the average of all rates of certain currency so if a rate for speicifc day is missing we can replace it with the all time average
         $avg = $this->getTableLocator()->get('Currencies')->find('all');
         $avg = $avg->select(['code', 'average' => $avg->func()->avg('value')])->group('code')->all()->toList();
         $averages = ['PLN' => []];
+        //Populating averages table
         foreach ($avg as $cur) {
             $averages[$cur->code] = $cur->average;
         }
@@ -128,6 +136,7 @@ class ChartsController extends AppController
             $arr[$value->code][$value->date] = floatval($value->value);
         }
 
+        //Replacing missing rates with averages and putting rate of 1 for PLN
         foreach ($arr as $currency => $values) {
             for ($i = 0; $i < count($dates); $i++) {
                 if (!isset($values[$dates[$i]])) {

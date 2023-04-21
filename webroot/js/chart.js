@@ -86,6 +86,7 @@ $(() => {
 
     let unqiueUnits = [];
 
+    //Populating datasets for chart.js
     function generateDatasets() {
         data = JSON.parse($('#data').val());
         let datasets = [];
@@ -110,6 +111,7 @@ $(() => {
             })
         }
 
+        //Rendering units that are first of all filtered so that no undefined is present in final html and then replacing units with units wrapped with paragraphs
         $('div#units').html(unqiueUnits.filter(x => x != undefined).map(x => `<p>${x}</p>`).toString().replaceAll(',', ''));
         return datasets;
     }
@@ -124,12 +126,14 @@ $(() => {
 
     let datasets = generateDatasets();
 
+    //Settings values of inputs from url
     $('#start').val(startDate);
     $('#end').val(endDate);
     $('#sum').prop('checked', JSON.parse(params.get('sum')));
 
     let tables = JSON.parse(params.get('tables'));
 
+    //Select2 behavior e.g. when checkbox is unchecked all the codes are automatically unselected or when users selects a code then checkbox will be automatically checked
     let selects = $('input[data-daily=true]').siblings('select');
     for (let i = 0; i < selects.length; i++) {
         selects.eq(i).on('select2:select', function() {
@@ -173,6 +177,7 @@ $(() => {
         
     }
 
+    //Collecting data from the form and putting it in the url
     $('#submitBtn').click(function() {
         let tables = [];
         $('input:checked:not(#draw):not(#sum)').each(function() {
@@ -185,6 +190,7 @@ $(() => {
         location.replace(`${window.location.origin}${window.location.pathname}?${params.toString()}`);
     });
 
+    //Chart config
     const chart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -244,6 +250,7 @@ $(() => {
                 let yAxis = chart.scales.y;
                 let xAxis = chart.scales.x;
 
+                //Plugin for making the cross lines on the cursor
                 if (chart.tooltip?._active?.length) {               
                     let x = chart.tooltip._active[0].element.x;
                     let y = chart.tooltip._active[0].element.y;            
@@ -260,6 +267,7 @@ $(() => {
                     ctx.stroke();
                     ctx.restore();
                 }
+                //Plugin for the no data text when no data is present
                 if (chart.data.datasets.length === 0) {
                     let width = chart.width;
                     let height = chart.height
@@ -273,6 +281,7 @@ $(() => {
                     ctx.fillText('spełniających podane kryteria', width / 2, height / 2 + 35);
                     ctx.restore();
                 } else {
+                    //Plugin for displaying a line from left to right on chart on value 0 of the yAxis
                     ctx.moveTo(xAxis.left, yAxis.getPixelForValue(0));
                     ctx.lineTo(xAxis.right, yAxis.getPixelForValue(0));
                     ctx.lineWidth = 1;
@@ -284,6 +293,7 @@ $(() => {
         }],
     });
 
+    //Drawing the charts points only if performance mode is not selected
     $('#draw').change(function() {
         chart.options.datasets = {
             line: {
