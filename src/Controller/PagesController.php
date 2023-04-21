@@ -41,6 +41,7 @@ class PagesController extends AppController
             'authorize' => 'Controller',
         ]);
         $this->loadComponent('GetChartData');
+        $this->loadComponent('StringFunctions');
         $this->Auth->allow('login');
     }
 
@@ -114,6 +115,7 @@ class PagesController extends AppController
      */
     public function chart()
     {
+        // Tables categories
         $hourlyTables = [
             'generation_from_wind_sources',
             'inter_system_exchange_of_power_flows',
@@ -127,45 +129,50 @@ class PagesController extends AppController
             'carbon_emissions',
         ];
 
+        //Getting start and end date from URL
+
+        $startDate = $this->request->getQuery('start') ?? DEFAULT_START_DATE;
+        $endDate = $this->request->getQuery('end') ?? DEFAULT_END_DATE;
+
         if ($this->request->getQuery('tables')) {
-            $startDate = empty($this->request->getQuery('start')) ? '2023-01-01' : $this->request->getQuery('start');
-            $endDate = empty($this->request->getQuery('end')) ? date('Y-m-d') : $this->request->getQuery('end');
             $tables = json_decode($this->request->getQuery('tables'), true);
             $tablesCount = count($tables);
-            $hourlyTable = false;
             $data = [];
 
-            for ($i = 0; $i < $tablesCount; $i++) {
-                if (in_array($tables[$i]['tableName'], $hourlyTables)) {
-                    $hourlyTable = true;
-                }
-            }
+            //Generating data for right tables
 
             for ($i = 0; $i < $tablesCount; $i++) {
-                $tableName = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $tables[$i]['tableName']))));
+                //Converting snake_case to camelCase
+                $tableName = $this->StringFunctions->snakeCaseToCamelCase($tables[$i]['tableName']);
+
                 if (in_array($tables[$i]['tableName'], $hourlyTables)) {
-                    $data = array_merge($data, $this->GetChartData->$tableName($startDate ?? DEFAULT_START_DATE, $endDate ?? DEFAULT_END_DATE, $this->request->getQuery('sum'), $startDate != $endDate));
+                    $data = array_merge($data, $this->GetChartData->generateHourlyTableData(ucfirst($tableName), $startDate, $endDate, $this->request->getQuery('sum'), $startDate != $endDate));
                 }
 
                 if (in_array($tables[$i]['tableName'], $newTables)) {
-                    $data = array_merge($data, $this->GetChartData->$tableName($startDate ?? DEFAULT_START_DATE, $endDate ?? DEFAULT_END_DATE, $startDate == $endDate));
+                    $data = array_merge($data, $this->GetChartData->generateNewTableData(ucfirst($tableName), $startDate, $endDate, $startDate == $endDate));
                 }
 
                 if (!in_array($tables[$i]['tableName'], $hourlyTables) && !in_array($tables[$i]['tableName'], $newTables)) {
                     for ($j = 0; $j < count($tables[$i]['codes']); $j++) {
-                        $data = array_merge($data, $this->GetChartData->$tableName($startDate ?? DEFAULT_START_DATE, $endDate ?? DEFAULT_END_DATE, $tables[$i]['codes'][$j], $startDate == $endDate));
+                        if ($tables[$i]['tableName'] != 'generation_of_power_generation_units') {
+                            $data = array_merge($data, $this->GetChartData->generateDailyTableData(ucfirst($tableName), $startDate, $endDate, $tables[$i]['codes'][$j], $startDate == $endDate));
+                        } else {
+                            $data = array_merge($data, $this->GetChartData->generationOfPowerGenerationUnits($startDate, $endDate, $tables[$i]['codes'][$j], $startDate == $endDate));
+                        }
                     }
                 }
             }
 
-            if ($startDate != $endDate) {
-                $labels = $this->dateRange($startDate ?? DEFAULT_START_DATE, $endDate ?? DEFAULT_END_DATE);
-            }
-
-            $this->set('labels', $labels ?? []);
             $this->set('data', $data ?? []);
         }
 
+        //Generating labels if dates are different
+        if ($startDate != $endDate) {
+            $labels = $this->dateRange($startDate, $endDate);
+        }
+
+        $this->set('labels', $labels ?? []);
         $this->set('title', 'Wykresy');
     }
 

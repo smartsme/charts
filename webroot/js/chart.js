@@ -7,9 +7,7 @@ $(() => {
     const endDate = params.get('end') ?? `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
 
     $('select.code').each(function() {
-        $(this).select2({
-            placeholder: 'Wybierz kod',
-        });
+        $(this).select2({});
     });
 
     let currency = localStorage.getItem('currency') ?? 'PLN';
@@ -45,7 +43,7 @@ $(() => {
         'open - coal_api2': `${currency}`,
         'high - coal_api2': `${currency}`,
         'low - coal_api2': `${currency}`,
-        'volume': 'kL',
+        'volume': 'KL',
         'first_transaction_rate': `${currency}/MWh`,
         'dkr': `${currency}/MWh`,
         'session_min': `${currency}/MWh`,
@@ -129,32 +127,50 @@ $(() => {
     $('#start').val(startDate);
     $('#end').val(endDate);
     $('#sum').prop('checked', JSON.parse(params.get('sum')));
+
     let tables = JSON.parse(params.get('tables'));
+
+    let selects = $('input[data-daily=true]').siblings('select');
+    for (let i = 0; i < selects.length; i++) {
+        selects.eq(i).on('select2:select', function() {
+            $(this).siblings('input').prop('checked', true);
+        });
+
+        selects.eq(i).on('select2:unselect', function(e) {
+            $(this).siblings('input').prop('checked', String($(this).val()) == '' ? false : true);
+        });
+
+        selects.eq(i).siblings('input').on('change', function() {
+            if (!$(this).is(':checked')) {
+                selects.eq(i).val(null).trigger('change');
+            }
+        })
+        generateOptions(selects.eq(i), $('input[data-daily=true]').eq(i).data('table'), tables?.filter(_ => _.tableName == selects.eq(i).attr('id'))[0]?.codes);
+    }
+
     if (tables) {
         for (let i = 0; i < tables.length; i++) {
             $(`input[data-table=${tables[i].tableName}]`).prop('checked', true);
-            if (tables[i]?.codes) {
-                $(`#${tables[i].tableName}`).select2().val(tables[i].codes).trigger('change');
-            }
         }
     }
 
-    for (let i = 0; i < $('input[data-daily=true]').siblings('select').length; i++) {
-        generateOptions($('input[data-daily=true]').siblings('select').eq(i), $('input[data-daily=true]').eq(i).data('table'));
-    }
-
-    function generateOptions(select, table) {
+    function generateOptions(select, table, selectedCodes) {
         $.ajax({
             url: `get-codes?table=${table}`,
             success: (res) => {
                 let codes = res.flat();
-                let html = '';
-                for (let i = 0; i < codes.length; i++) {
-                    html += `<option value='${codes[i]}'>${codes[i]}</option>`;
+                let data = [];
+                for (let code of codes) {
+                    data.push({ id: code, text: code, selected: selectedCodes?.includes(code) });
                 }
-                select.html(html);
+                select.select2({
+                    data: data,
+                    closeOnSelect: false,
+                    placeholder: 'Wybierz kod'
+                });
             }
         });
+        
     }
 
     $('#submitBtn').click(function() {
@@ -162,18 +178,6 @@ $(() => {
         $('input:checked:not(#draw):not(#sum)').each(function() {
             tables.push({ tableName : $(this).data('table'), codes: $(this).siblings('.code').eq(0).val() })
         })
-        // params.delete('table');
-        // params.delete('code');
-        // params.delete('mode');
-        // $('input:checked:not(#draw):not(#sum)').each(function() {
-        //     params.append('table', $(this).data('table'));
-        //     if ($(this).siblings('.code').length) {
-        //         params.append('code', $(this).siblings('.code').eq(0).val());
-        //     }
-        //     if ($(this).siblings('.mode').length) {
-        //         params.append('mode', $(this).siblings('.mode').eq(0).val());
-        //     }
-        // })
         params.set('start', $('#start').val());
         params.set('end', $('#end').val());
         params.set('sum', $('#sum').is(':checked'));
@@ -239,12 +243,6 @@ $(() => {
                 let ctx = chart.ctx;
                 let yAxis = chart.scales.y;
                 let xAxis = chart.scales.x;
-                ctx.moveTo(xAxis.left, yAxis.getPixelForValue(0));
-                ctx.lineTo(xAxis.right, yAxis.getPixelForValue(0));
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = '#ffffff';
-                ctx.stroke();
-                ctx.restore();
 
                 if (chart.tooltip?._active?.length) {               
                     let x = chart.tooltip._active[0].element.x;
@@ -273,6 +271,13 @@ $(() => {
                     ctx.font = '20px Comfortaa';
                     ctx.fillText('Brak danych', width / 2, height / 2);
                     ctx.fillText('spełniających podane kryteria', width / 2, height / 2 + 35);
+                    ctx.restore();
+                } else {
+                    ctx.moveTo(xAxis.left, yAxis.getPixelForValue(0));
+                    ctx.lineTo(xAxis.right, yAxis.getPixelForValue(0));
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.stroke();
                     ctx.restore();
                 }
             }
